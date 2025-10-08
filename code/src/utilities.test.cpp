@@ -4,13 +4,18 @@
 
 using namespace reprojection_calibration::spline;
 
-TEST(Utilities, TestAlternatingSum) {
-    double const sum_1{AlternatingSum(2, 0.5, 0.2)};
-    EXPECT_EQ(sum_1, 0.5 + 0.2);
+TEST(Utilities, TestBinomialCoefficient) {
+    // Wiki: " where it gives the number of ways, disregarding order, that k objects can be chosen from among n objects"
+    EXPECT_EQ(BinomialCoefficient(0, 0), 1);
+    EXPECT_EQ(BinomialCoefficient(10, 0), 1);
+    EXPECT_EQ(BinomialCoefficient(5, 5), 1);
+    EXPECT_EQ(BinomialCoefficient(4, 2), 6);  // Six ways to choose two elements from {1, 2, 3, 4}, namely {1, 2}, {1,
+                                              // 3}, {1, 4}, {2, 3}, {2, 4} and {3, 4}.
+}
 
-    double const sum_2{AlternatingSum(3, 0.5, 0.2)};
-    EXPECT_EQ(sum_2, 0.5 + 0.2 + 0.5);
-
-    double const sum_null{AlternatingSum(0, 0.5, 0.2)};
-    EXPECT_EQ(sum_null, 0);
+TEST(Utilities, TestFactorial) {
+    EXPECT_EQ(Factorial(0), 1);
+    EXPECT_EQ(Factorial(1), 1);
+    EXPECT_EQ(Factorial(2), 2);
+    EXPECT_EQ(Factorial(3), 6);
 }
