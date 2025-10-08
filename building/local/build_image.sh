@@ -18,7 +18,7 @@ while getopts ":t:" opt; do
   esac
 done
 
-IMAGE=feature-extraction
+IMAGE=spline
 SCRIPT_FOLDER="$(dirname "$(realpath -s "$0")")"
 TAG=${IMAGE}:${TARGET_STAGE}
 
