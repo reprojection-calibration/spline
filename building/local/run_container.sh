@@ -18,7 +18,7 @@ while getopts ":t:" opt; do
   esac
 done
 
-IMAGE=feature-extraction
+IMAGE=spline
 TAG=${IMAGE}:${TARGET_STAGE}
 
 echo "Running container from image with tag '$TAG'..."
