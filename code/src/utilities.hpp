@@ -5,6 +5,6 @@
 
 namespace reprojection_calibration::spline {
 
-double AlternatingSum(int const n, double const increment_1, double const increment_2);
+uint64_t Factorial(uint64_t const n);
 
 }  // namespace reprojection_calibration::spline

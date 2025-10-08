@@ -4,13 +4,9 @@
 
 using namespace reprojection_calibration::spline;
 
-TEST(Utilities, TestAlternatingSum) {
-    double const sum_1{AlternatingSum(2, 0.5, 0.2)};
-    EXPECT_EQ(sum_1, 0.5 + 0.2);
-
-    double const sum_2{AlternatingSum(3, 0.5, 0.2)};
-    EXPECT_EQ(sum_2, 0.5 + 0.2 + 0.5);
-
-    double const sum_null{AlternatingSum(0, 0.5, 0.2)};
-    EXPECT_EQ(sum_null, 0);
+TEST(Utilities, TestFactorial) {
+    EXPECT_EQ(Factorial(0), 1);
+    EXPECT_EQ(Factorial(1), 1);
+    EXPECT_EQ(Factorial(2), 2);
+    EXPECT_EQ(Factorial(3), 6);
 }
