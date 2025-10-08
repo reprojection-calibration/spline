@@ -1,9 +1,12 @@
 #pragma once
 
 #include <Eigen/Dense>
-#include <vector>
 
 namespace reprojection_calibration::spline {
+
+Eigen::MatrixXd BlendingMatrix(int const k);
+
+Eigen::MatrixXd CumulativeBlendingMatrix(int const k);
 
 uint64_t BinomialCoefficient(uint64_t const n, uint64_t const k);
 

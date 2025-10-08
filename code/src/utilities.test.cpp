@@ -4,6 +4,24 @@
 
 using namespace reprojection_calibration::spline;
 
+// Reference [1] Efficient Derivative Computation for B-Splines on Lie Groups
+// Reference [2] Spline Fusion: A continuous-time representation for visual-inertial fusion with application to rolling
+// shutter cameras
+
+TEST(Utilities, TestBlendingMatrix) {
+    Eigen::MatrixXd const blender{BlendingMatrix(4)};
+    EXPECT_FLOAT_EQ(blender.norm(), 1.7480147);  // Heuristic
+
+    Eigen::MatrixXd const cumulative_blender{CumulativeBlendingMatrix(4)};
+    EXPECT_FLOAT_EQ(cumulative_blender.norm(), 1.6996732);                                     // Heuristic
+    EXPECT_TRUE(cumulative_blender.row(0).isApprox(Eigen::Vector4d{1, 0, 0, 0}.transpose()));  // Eqn. 20 from [1]
+
+    // Ground-truth value comes from the C matrix at the top of page five in [2]
+    Eigen::Matrix4d gt_cumulative_blender{{6, 0, 0, 0}, {5, 3, -3, 1}, {1, 3, 3, -2}, {0, 0, 0, 1}};
+    gt_cumulative_blender /= 6;
+    EXPECT_TRUE(cumulative_blender.isApprox(gt_cumulative_blender));
+}
+
 TEST(Utilities, TestBinomialCoefficient) {
     // Wiki: " where it gives the number of ways, disregarding order, that k objects can be chosen from among n objects"
     EXPECT_EQ(BinomialCoefficient(0, 0), 1);
