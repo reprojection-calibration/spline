@@ -14,6 +14,25 @@ std::tuple<double, int> NormalizedSegmentTime(uint64_t const t0_ns, uint64_t con
     return {(s_t - i), static_cast<int>(i)};
 }
 
+// For polynomial k=4
+//      1 1 1 1     - zero derivative coefficients
+//      0 1 2 3     - first derivative coefficients
+//      0 0 2 6     - ...
+//      0 0 0 6
+Eigen::MatrixXd PolynomialCoefficients(int const k) {
+    assert(k >= 1);
+
+    Eigen::MatrixXd result{Eigen::MatrixXd::Zero(k, k)};
+    result.row(0).setOnes();
+    for (int i{1}; i < k; ++i) {
+        for (int j{i}; j < k; ++j) {
+            result(i, j) = (j - (i - 1)) * result(i - 1, j);
+        }
+    }
+
+    return result;
+}
+
 // TODO(Jack): Is derivative really the right term here?
 Eigen::VectorXd TimePolynomial(int const k, double const u, int const derivative) {
     assert(k >= 1);  // u will also be positive but I am not sure that condition is related to this function itself.

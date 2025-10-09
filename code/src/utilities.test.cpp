@@ -26,6 +26,13 @@ TEST(Utilities, TestNormalizedSegmentTime) {
     EXPECT_EQ(i4, 3);
 }
 
+TEST(Utilities, TestPolynomialCoefficients) {
+    Eigen::Matrix4d const polynomial_coefficients{PolynomialCoefficients(4)};
+
+    Eigen::Matrix4d const gt_polynomial_coefficients{{1, 1, 1, 1}, {0, 1, 2, 3}, {0, 0, 2, 6}, {0, 0, 0, 6}};
+    EXPECT_TRUE(polynomial_coefficients.isApprox(gt_polynomial_coefficients));
+}
+
 TEST(Utilities, TestTimePolynomial) {
     Eigen::VectorXd const result0{TimePolynomial(4, 0.1, 0)};
     EXPECT_EQ(result0.rows(), 4);

@@ -13,6 +13,8 @@ std::tuple<double, int> NormalizedSegmentTime(uint64_t const t0_ns, uint64_t con
 // TODO(Jack): How can we also make this calculate the derivatives?
 Eigen::VectorXd TimePolynomial(int const k, double const u, int const derivative);
 
+Eigen::MatrixXd PolynomialCoefficients(int const k);
+
 Eigen::MatrixXd BlendingMatrix(int const k);
 
 Eigen::MatrixXd CumulativeBlendingMatrix(int const k);
