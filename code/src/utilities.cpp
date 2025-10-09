@@ -1,9 +1,32 @@
 #include "utilities.hpp"
 
+#include <cmath>
+
 namespace reprojection_calibration::spline {
 
+double SegmentTime(double const t0_ns, double const t_ns, double const delta_t_ns) {
+    assert(t0_ns <= t_ns);
+    assert(delta_t_ns > 0);
+
+    double const s_t{(t_ns - t0_ns) / delta_t_ns};
+
+    return s_t - std::floor(s_t);
+}
+
+Eigen::VectorXd TimePolynomial(int const k, double const u) {
+    assert(k >= 1);  // u will also be positive but I am not sure that condition is related to this function itself.
+
+    Eigen::VectorXd result{Eigen::VectorXd(k)};
+    result(0) = 1;
+    for (int i{1}; i < k; ++i) {
+        result(i) = result(i - 1) * u;
+    }
+
+    return result;
+}
+
 Eigen::MatrixXd BlendingMatrix(int const k) {
-    auto result{Eigen::MatrixXd::Zero(k, k).eval()};
+    Eigen::MatrixXd result{Eigen::MatrixXd::Zero(k, k)};
 
     for (int s{0}; s < k; ++s) {
         for (int n{0}; n < k; ++n) {
