@@ -14,6 +14,7 @@ inline constexpr int d{3};  // State dimension for r3 spline
 
 using MatrixDK = Eigen::Matrix<double, constants::d, constants::k>;
 using MatrixKK = Eigen::Matrix<double, constants::k, constants::k>;
+using VectorD = Eigen::Vector<double, constants::d>;
 using VectorK = Eigen::Vector<double, constants::k>;
 
 // NOTE(Jack): It is a unfiform spline which presupposes that all added knots correspond to specific evenly spaced
@@ -22,7 +23,7 @@ class r3Spline {
    public:
     r3Spline(uint64_t const t0_ns, uint64_t const delta_t_ns) : t0_ns_{t0_ns}, delta_t_ns_{delta_t_ns} {}
 
-    std::optional<Eigen::Vector3d> Evaluate(uint64_t const t_ns) const {
+    std::optional<VectorD> Evaluate(uint64_t const t_ns) const {
         auto const [u_i, i]{NormalizedSegmentTime(t0_ns_, t_ns, delta_t_ns_)};
 
         // From reference [1] - "At time t in [t_i, t_i+1) the value of p(t) only depends on the control points p_i,
@@ -39,7 +40,7 @@ class r3Spline {
     }
 
     // TODO(Jack): Let us consider what benefit we would get from making this private at some later point
-    std::vector<Eigen::Vector3d> knots_;  // A.k.a. "control points"
+    std::vector<VectorD> knots_;  // A.k.a. "control points"
 
    private:
     uint64_t t0_ns_;
@@ -51,7 +52,7 @@ TEST(r3Spline, Testr3SplineEvaluate) {
     r3Spline r3_spline{100, 5};
 
     for (int i{0}; i < constants::k; ++i) {
-        r3_spline.knots_.push_back(i * Eigen::Vector3d::Ones());
+        r3_spline.knots_.push_back(i * VectorD::Ones());
     }
 
     // WARN(Jack): My first intuition is that there is an off by one error. I honestly expected p_0 to be zero not one.
@@ -77,13 +78,13 @@ TEST(r3Spline, Testr3SplineInvalidEvaluateConditions) {
 
     // Add four knots which means we can ask for evaluations within the one time segment at the very start of the spline
     for (int i{0}; i < constants::k; ++i) {
-        r3_spline.knots_.push_back(Eigen::Vector3d::Zero());
+        r3_spline.knots_.push_back(VectorD::Zero());
     }
 
     EXPECT_NE(r3_spline.Evaluate(100), std::nullopt);  // Inside first time segment - valid
     EXPECT_EQ(r3_spline.Evaluate(105), std::nullopt);  // Outside first time segment - invalid
 
     // Add one more knot to see that we can now do a valid evaluation in the second time segment
-    r3_spline.knots_.push_back(Eigen::Vector3d::Zero());
+    r3_spline.knots_.push_back(VectorD::Zero());
     EXPECT_NE(r3_spline.Evaluate(105), std::nullopt);
 }
