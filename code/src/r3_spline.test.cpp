@@ -47,30 +47,6 @@ class r3Spline {
     uint64_t delta_t_ns_;
 };
 
-TEST(r3Spline, Testr3SplineEvaluate) {
-    // Completely empty spline
-    r3Spline r3_spline{100, 5};
-
-    for (int i{0}; i < constants::k; ++i) {
-        r3_spline.knots_.push_back(i * VectorD::Ones());
-    }
-
-    // WARN(Jack): My first intuition is that there is an off by one error. I honestly expected p_0 to be zero not one.
-    // But maybe this is correct and does not match with online reference resources simply because [1] uses a different
-    // convention than most people use and I just do not understand yet.
-    auto const p_0{r3_spline.Evaluate(100)};
-    ASSERT_TRUE(p_0.has_value());
-    EXPECT_TRUE(p_0.value().isApproxToConstant(1));
-
-    auto const p_1{r3_spline.Evaluate(101)};
-    ASSERT_TRUE(p_1.has_value());
-    EXPECT_TRUE(p_1.value().isApproxToConstant(1.2));
-
-    auto const p_2{r3_spline.Evaluate(102)};
-    ASSERT_TRUE(p_2.has_value());
-    EXPECT_TRUE(p_2.value().isApproxToConstant(1.4));
-}
-
 TEST(r3Spline, Testr3SplineInvalidEvaluateConditions) {
     // Completely empty spline
     r3Spline r3_spline{100, 5};
@@ -87,4 +63,34 @@ TEST(r3Spline, Testr3SplineInvalidEvaluateConditions) {
     // Add one more knot to see that we can now do a valid evaluation in the second time segment
     r3_spline.knots_.push_back(VectorD::Zero());
     EXPECT_NE(r3_spline.Evaluate(105), std::nullopt);
+}
+
+TEST(r3Spline, Testr3SplineEvaluate) {
+    // Completely empty spline
+    r3Spline r3_spline{100, 5};
+    for (int i{0}; i < constants::k; ++i) {
+        r3_spline.knots_.push_back(i * VectorD::Ones());
+    }
+
+    // Test three elements in the first and only valid time segment
+    // WARN(Jack): My first intuition is that there is an off by one error. I honestly expected p_0 to be zero not one.
+    // But maybe this is correct and does not match with online reference resources simply because [1] uses a different
+    // convention than most people use and I just do not understand yet.
+    auto const p_0{r3_spline.Evaluate(100)};
+    ASSERT_TRUE(p_0.has_value());
+    EXPECT_TRUE(p_0.value().isApproxToConstant(1));
+
+    auto const p_1{r3_spline.Evaluate(101)};
+    ASSERT_TRUE(p_1.has_value());
+    EXPECT_TRUE(p_1.value().isApproxToConstant(1.2));
+
+    auto const p_2{r3_spline.Evaluate(102)};
+    ASSERT_TRUE(p_2.has_value());
+    EXPECT_TRUE(p_2.value().isApproxToConstant(1.4));
+
+    // Add one more element and test the first element in that second time segment
+    r3_spline.knots_.push_back(4 * VectorD::Ones());
+    auto const p_5{r3_spline.Evaluate(105)};
+    ASSERT_TRUE(p_5.has_value());
+    EXPECT_TRUE(p_5.value().isApproxToConstant(2));
 }
