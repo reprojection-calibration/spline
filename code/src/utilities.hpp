@@ -6,7 +6,7 @@ namespace reprojection_calibration::spline {
 
 // Calculates what [1] calls "u" - "normalized time elapsed since start of the segment" - see the second paragraph in
 // section 4.2 Matrix Representation
-double SegmentTime(double const t0_ns, double const t_ns, double const delta_t_ns);
+double NormalizedSegmentTime(uint64_t const t0_ns, uint64_t const t_ns, uint64_t const delta_t_ns);
 
 // TODO(Jack): How can we also make this calculate the derivatives?
 Eigen::VectorXd TimePolynomial(int const k, double const u);

@@ -8,11 +8,11 @@ using namespace reprojection_calibration::spline;
 // Reference [2] Spline Fusion: A continuous-time representation for visual-inertial fusion with application to rolling
 // shutter cameras
 
-TEST(Utilities, TestSegmentTime) {
-    EXPECT_EQ(SegmentTime(100, 100, 5), 0);
-    EXPECT_EQ(SegmentTime(100, 115, 5), 0);
-    EXPECT_FLOAT_EQ(SegmentTime(100, 116, 5), 0.2);
-    EXPECT_FLOAT_EQ(SegmentTime(100, 117, 5), 0.4);
+TEST(Utilities, TestNormalizedSegmentTime) {
+    EXPECT_EQ(NormalizedSegmentTime(100, 100, 5), 0);
+    EXPECT_EQ(NormalizedSegmentTime(100, 115, 5), 0);
+    EXPECT_FLOAT_EQ(NormalizedSegmentTime(100, 116, 5), 0.2);
+    EXPECT_FLOAT_EQ(NormalizedSegmentTime(100, 117, 5), 0.4);
 }
 
 TEST(Utilities, TestTimePolynomial) {

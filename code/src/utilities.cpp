@@ -4,11 +4,11 @@
 
 namespace reprojection_calibration::spline {
 
-double SegmentTime(double const t0_ns, double const t_ns, double const delta_t_ns) {
+double NormalizedSegmentTime(uint64_t const t0_ns, uint64_t const t_ns, uint64_t const delta_t_ns) {
     assert(t0_ns <= t_ns);
     assert(delta_t_ns > 0);
 
-    double const s_t{(t_ns - t0_ns) / delta_t_ns};
+    double const s_t{static_cast<double>(t_ns - t0_ns) / delta_t_ns};
 
     return s_t - std::floor(s_t);
 }
