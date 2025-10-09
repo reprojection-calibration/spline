@@ -38,6 +38,7 @@ include(GoogleTest)
 
 set(TESTS
         src/utilities.test.cpp
+        src/r3_spline.test.cpp
 )
 foreach (TEST IN LISTS TESTS)
     get_filename_component(TEST_NAME ${TEST} NAME_WLE)
