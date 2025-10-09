@@ -8,8 +8,13 @@ namespace reprojection_calibration::spline::constants {
 
 // Instead of templating everything like mad we will use this global to parameterize the order of the spline.
 inline constexpr int k{4};  // Spline order - note spline "degree" is k-1, so when k=4 it is a cubic spline!
+inline constexpr int d{3};  // State dimension for r3 spline
 
 }  // namespace reprojection_calibration::spline::constants
+
+using MatrixDK = Eigen::Matrix<double, constants::d, constants::k>;
+using MatrixKK = Eigen::Matrix<double, constants::k, constants::k>;
+using VectorK = Eigen::Vector<double, constants::k>;
 
 // NOTE(Jack): It is a unfiform spline which presupposes that all added knots correspond to specific evenly spaced
 // times.
@@ -18,7 +23,7 @@ class r3Spline {
     r3Spline(uint64_t const t0_ns, uint64_t const delta_t_ns) : t0_ns_{t0_ns}, delta_t_ns_{delta_t_ns} {}
 
     std::optional<Eigen::Vector3d> Evaluate(uint64_t const t_ns) const {
-        auto const [u, i]{NormalizedSegmentTime(t0_ns_, t_ns, delta_t_ns_)};
+        auto const [u_i, i]{NormalizedSegmentTime(t0_ns_, t_ns, delta_t_ns_)};
 
         // From reference [1] - "At time t in [t_i, t_i+1) the value of p(t) only depends on the control points p_i,
         // p_i+1, ..., p_i+k-1" - See the start of the second paragraph in section 4.2 Matrix Representation.
@@ -26,7 +31,11 @@ class r3Spline {
             return std::nullopt;
         }
 
-        return Eigen::Vector3d::Zero();
+        MatrixDK const P{Eigen::Map<const MatrixDK>(knots_[i].data(), constants::d, constants::k)};
+        static MatrixKK const M{BlendingMatrix(constants::k)};
+        VectorK const u{TimePolynomial(constants::k, u_i)};
+
+        return P * M * u;
     }
 
     // TODO(Jack): Let us consider what benefit we would get from making this private at some later point
