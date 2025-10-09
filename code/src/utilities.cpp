@@ -14,12 +14,14 @@ std::tuple<double, int> NormalizedSegmentTime(uint64_t const t0_ns, uint64_t con
     return {(s_t - i), static_cast<int>(i)};
 }
 
-Eigen::VectorXd TimePolynomial(int const k, double const u) {
+// TODO(Jack): Is derivative really the right term here?
+Eigen::VectorXd TimePolynomial(int const k, double const u, int const derivative) {
     assert(k >= 1);  // u will also be positive but I am not sure that condition is related to this function itself.
+    assert(0 <= derivative and derivative <= k - 1);
 
     Eigen::VectorXd result{Eigen::VectorXd(k)};
-    result(0) = 1;
-    for (int i{1}; i < k; ++i) {
+    result(derivative) = 1;
+    for (int i{1 + derivative}; i < k; ++i) {
         result(i) = result(i - 1) * u;
     }
 

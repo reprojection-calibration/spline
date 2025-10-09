@@ -18,7 +18,7 @@ std::optional<VectorD> r3Spline::Evaluate(uint64_t const t_ns) const {
 
     MatrixDK const P{Eigen::Map<const MatrixDK>(knots_[i].data(), constants::d, constants::k)};
     static MatrixKK const M{BlendingMatrix(constants::k)};  // Static means it only evaluates once :)
-    VectorK const u{TimePolynomial(constants::k, u_i)};
+    VectorK const u{TimePolynomial(constants::k, u_i, 0)};
 
     return P * M * u;
 }

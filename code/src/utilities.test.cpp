@@ -27,9 +27,17 @@ TEST(Utilities, TestNormalizedSegmentTime) {
 }
 
 TEST(Utilities, TestTimePolynomial) {
-    Eigen::VectorXd const result{TimePolynomial(4, 0.1)};
-    EXPECT_EQ(result.rows(), 4);
-    EXPECT_TRUE(result.isApprox(Eigen::Vector4d{1, 1.0 / 10, 1.0 / 100, 1.0 / 1000}));
+    Eigen::VectorXd const result0{TimePolynomial(4, 0.1, 0)};
+    EXPECT_EQ(result0.rows(), 4);
+    EXPECT_TRUE(result0.isApprox(Eigen::Vector4d{1, 1.0 / 10, 1.0 / 100, 1.0 / 1000}));
+
+    Eigen::VectorXd const result1{TimePolynomial(4, 0.1, 1)};
+    EXPECT_EQ(result1.rows(), 4);
+    EXPECT_TRUE(result1.isApprox(Eigen::Vector4d{0, 1, 1.0 / 10, 1.0 / 100}));
+
+    Eigen::VectorXd const result2{TimePolynomial(4, 0.1, 2)};
+    EXPECT_EQ(result2.rows(), 4);
+    EXPECT_TRUE(result2.isApprox(Eigen::Vector4d{0, 0, 1, 1.0 / 10}));
 }
 
 TEST(Utilities, TestBlendingMatrix) {
