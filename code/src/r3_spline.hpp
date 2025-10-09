@@ -22,7 +22,8 @@ class r3Spline {
    public:
     r3Spline(uint64_t const t0_ns, uint64_t const delta_t_ns);
 
-    std::optional<VectorD> Evaluate(uint64_t const t_ns) const;
+    // TODO(Jack): use enum and static cast instead of int
+    std::optional<VectorD> Evaluate(uint64_t const t_ns, int const derivative) const;
 
     // TODO(Jack): Let us consider what benefit we would get from making this private at some later point
     std::vector<VectorD> knots_;  // A.k.a. "control points"
