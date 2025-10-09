@@ -15,8 +15,8 @@ Eigen::MatrixXd BlendingMatrix(int const k);
 
 Eigen::MatrixXd CumulativeBlendingMatrix(int const k);
 
-uint64_t BinomialCoefficient(uint64_t const n, uint64_t const k);
+int BinomialCoefficient(int const n, int const k);
 
-uint64_t Factorial(uint64_t const n);
+int Factorial(int const n);
 
 }  // namespace reprojection_calibration::spline
