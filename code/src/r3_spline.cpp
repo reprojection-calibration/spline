@@ -1,7 +1,6 @@
 #include "r3_spline.hpp"
 
-#include <iostream>
-
+#include "constants.hpp"
 #include "utilities.hpp"
 
 namespace reprojection_calibration::spline {

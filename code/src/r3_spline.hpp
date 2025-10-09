@@ -2,7 +2,7 @@
 
 #include <optional>
 
-#include "types_and_constants.hpp"
+#include "types.hpp"
 
 namespace reprojection_calibration::spline {
 

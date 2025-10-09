@@ -1,8 +1,7 @@
 #pragma once
 
+#include <Eigen/Dense>
 #include <tuple>
-
-#include "types_and_constants.hpp"
 
 namespace reprojection_calibration::spline {
 

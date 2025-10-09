@@ -2,6 +2,9 @@
 
 #include <gtest/gtest.h>
 
+#include "constants.hpp"
+#include "types.hpp"
+
 using namespace reprojection_calibration::spline;
 
 TEST(r3Spline, Testr3SplineInvalidEvaluateConditions) {
