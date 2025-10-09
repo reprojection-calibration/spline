@@ -12,6 +12,7 @@ add_compile_options(-Werror -Wall -Wextra -Wpedantic)
 find_package(Eigen3 REQUIRED)
 
 set(SRC_FILES
+        src/r3_spline.cpp
         src/utilities.cpp
 )
 add_library(${PROJECT_NAME} SHARED
@@ -38,6 +39,7 @@ include(GoogleTest)
 
 set(TESTS
         src/utilities.test.cpp
+        src/r3_spline.test.cpp
 )
 foreach (TEST IN LISTS TESTS)
     get_filename_component(TEST_NAME ${TEST} NAME_WLE)
