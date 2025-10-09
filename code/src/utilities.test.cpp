@@ -8,6 +8,19 @@ using namespace reprojection_calibration::spline;
 // Reference [2] Spline Fusion: A continuous-time representation for visual-inertial fusion with application to rolling
 // shutter cameras
 
+TEST(Utilities, TestSegmentTime) {
+    EXPECT_EQ(SegmentTime(100, 100, 5), 0);
+    EXPECT_EQ(SegmentTime(100, 115, 5), 0);
+    EXPECT_FLOAT_EQ(SegmentTime(100, 116, 5), 0.2);
+    EXPECT_FLOAT_EQ(SegmentTime(100, 117, 5), 0.4);
+}
+
+TEST(Utilities, TestTimePolynomial) {
+    Eigen::VectorXd const result{TimePolynomial(4, 0.1)};
+    EXPECT_EQ(result.rows(), 4);
+    EXPECT_TRUE(result.isApprox(Eigen::Vector4d{1, 1.0 / 10, 1.0 / 100, 1.0 / 1000}));
+}
+
 TEST(Utilities, TestBlendingMatrix) {
     Eigen::MatrixXd const blender{BlendingMatrix(4)};
     EXPECT_FLOAT_EQ(blender.norm(), 1.7480147);  // Heuristic
