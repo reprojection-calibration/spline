@@ -4,7 +4,7 @@
 
 using namespace reprojection_calibration::spline;
 
-// Testing Util
+// Testing Util - COPY AND PASTED
 bool IsRotation(Eigen::Matrix3d const& R) {
     Eigen::Matrix3d const RRT{R * R.transpose()};  // For rotations R^T = R^-1
     bool const is_orthogonal{(RRT - Eigen::Matrix3d::Identity()).norm() < 1e-10};
