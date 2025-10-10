@@ -2,6 +2,9 @@
 
 #include <gtest/gtest.h>
 
+#include "constants.hpp"
+#include "types.hpp"
+
 using namespace reprojection_calibration::spline;
 
 TEST(r3Spline, Testr3SplineInvalidEvaluateConditions) {
@@ -50,4 +53,24 @@ TEST(r3Spline, Testr3SplineEvaluate) {
     auto const p_5{r3_spline.Evaluate(105)};
     ASSERT_TRUE(p_5.has_value());
     EXPECT_TRUE(p_5.value().isApproxToConstant(2));
+}
+
+TEST(r3Spline, Testr3SplineEvaluateDerivatives) {
+    // Completely empty spline
+    r3Spline r3_spline{100, 5};
+    for (int i{0}; i < constants::k; ++i) {
+        r3_spline.knots_.push_back(i * VectorD::Ones());
+    }
+
+    auto const p_du{r3_spline.Evaluate(101, DerivativeOrder::First)};
+    ASSERT_TRUE(p_du.has_value());
+    // Honestly I expected this to be one because our data is a linear line with slope one, but we are taking this
+    // derivative with respect to time and not to the x-axis, therefore it is 0.2 m/ns because our time interval
+    // (delta_t_ns) is 5.
+    EXPECT_TRUE(p_du.value().isApproxToConstant(0.2));
+
+    auto const p_dudu{r3_spline.Evaluate(101, DerivativeOrder::Second)};
+    ASSERT_TRUE(p_dudu.has_value());
+    // Linear line has no acceleration.
+    EXPECT_TRUE(p_dudu.value().isApproxToConstant(0));
 }

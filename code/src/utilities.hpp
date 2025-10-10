@@ -11,7 +11,9 @@ namespace reprojection_calibration::spline {
 std::tuple<double, int> NormalizedSegmentTime(uint64_t const t0_ns, uint64_t const t_ns, uint64_t const delta_t_ns);
 
 // TODO(Jack): How can we also make this calculate the derivatives?
-Eigen::VectorXd TimePolynomial(int const k, double const u);
+Eigen::VectorXd TimePolynomial(int const k, double const u, int const derivative);
+
+Eigen::MatrixXd PolynomialCoefficients(int const k);
 
 Eigen::MatrixXd BlendingMatrix(int const k);
 
