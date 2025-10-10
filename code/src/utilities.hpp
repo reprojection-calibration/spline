@@ -7,7 +7,7 @@ namespace reprojection_calibration::spline {
 
 // Calculates what [1] calls "u" - "normalized time elapsed since start of the segment" - see the second paragraph in
 // section 4.2 Matrix Representation. In addition to the normalized segment time u we also return the segment index i as
-// this is useful information for error checking later and follows the "law of useful return" principle :)
+// this is useful information for error/bounds checking and follows the "law of useful return" principle :)
 std::tuple<double, int> NormalizedSegmentTime(uint64_t const t0_ns, uint64_t const t_ns, uint64_t const delta_t_ns);
 
 // TODO(Jack): How can we also make this calculate the derivatives?
@@ -19,6 +19,8 @@ Eigen::MatrixXd BlendingMatrix(int const k);
 
 Eigen::MatrixXd CumulativeBlendingMatrix(int const k);
 
+// Note the symbol variables n and k come directly from wikipedia and are not chosen to reflect any relation to any
+// other variable symbol in the library.
 int BinomialCoefficient(int const n, int const k);
 
 int Factorial(int const n);

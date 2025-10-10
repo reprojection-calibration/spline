@@ -74,3 +74,28 @@ TEST(r3Spline, Testr3SplineEvaluateDerivatives) {
     // Linear line has no acceleration.
     EXPECT_TRUE(p_dudu.value().isApproxToConstant(0));
 }
+
+// See the top of page five in [2] - the column vectors of u
+TEST(r3Spline, Testr3SplineCalculateUAtZero) {
+    double const u_i{0};
+
+    VectorK const u{r3Spline::CalculateU(u_i)};
+    VectorK const du{r3Spline::CalculateU(u_i, DerivativeOrder::First)};
+    VectorK const dudu{r3Spline::CalculateU(u_i, DerivativeOrder::Second)};
+
+    EXPECT_TRUE(u.isApprox(VectorK{1, 0, 0, 0}));
+    EXPECT_TRUE(du.isApprox(VectorK{0, 1, 0, 0}));
+    EXPECT_TRUE(dudu.isApprox(VectorK{0, 0, 2, 0}));
+}
+
+TEST(r3Spline, Testr3SplineCalculate) {
+    double const u_i{0.5};
+
+    VectorK const u{r3Spline::CalculateU(u_i)};
+    VectorK const du{r3Spline::CalculateU(u_i, DerivativeOrder::First)};
+    VectorK const dudu{r3Spline::CalculateU(u_i, DerivativeOrder::Second)};
+
+    EXPECT_TRUE(u.isApprox(VectorK{1, 0.5, 0.25, 0.125}));
+    EXPECT_TRUE(du.isApprox(VectorK{0, 1, 1, 0.75}));
+    EXPECT_TRUE(dudu.isApprox(VectorK{0, 0, 2, 3}));
+}
