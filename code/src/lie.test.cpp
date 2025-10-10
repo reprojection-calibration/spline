@@ -18,29 +18,30 @@ bool IsRotation(Eigen::Matrix3d const& R) {
 TEST(Lie, TestExp) {
     // NOTE(Jack): These values in the tests are more or less just intuitive heuristic values - if anyone has a better
     // idea to prove that our Exp() implementation works please feel free to contribute that :)
-    Eigen::Vector3d const a{Eigen::Vector3d(0, 0, 0)};
-    Eigen::Matrix3d const exp_a{Exp(a)};
-    EXPECT_TRUE(IsRotation(exp_a));
-    EXPECT_TRUE(exp_a.isApprox(Eigen::Matrix3d::Identity()));
+    Eigen::Vector3d const phi{Eigen::Vector3d(0, 0, 0)};
+    Eigen::Matrix3d const R{Exp(phi)};
+    EXPECT_TRUE(IsRotation(R));
+    EXPECT_TRUE(R.isApprox(Eigen::Matrix3d::Identity()));
 
-    Eigen::Vector3d const a1{Eigen::Vector3d(M_PI, 0, 0)};
-    Eigen::Matrix3d const exp_a1{Exp(a1)};
-    EXPECT_TRUE(IsRotation(exp_a1));
-    EXPECT_TRUE(exp_a1.diagonal().isApprox(Eigen::Vector3d{1, -1, -1}));
+    Eigen::Vector3d const phi_1{Eigen::Vector3d(M_PI, 0, 0)};
+    Eigen::Matrix3d const R_1{Exp(phi_1)};
+    EXPECT_TRUE(IsRotation(R_1));
+    EXPECT_TRUE(R_1.diagonal().isApprox(Eigen::Vector3d{1, -1, -1}));
 
-    Eigen::Vector3d const a2{Eigen::Vector3d(0, M_PI, 0)};
-    Eigen::Matrix3d const exp_a2{Exp(a2)};
-    EXPECT_TRUE(IsRotation(exp_a2));
-    EXPECT_TRUE(exp_a2.diagonal().isApprox(Eigen::Vector3d{-1, 1, -1}));
+    Eigen::Vector3d const phi_2{Eigen::Vector3d(0, M_PI, 0)};
+    Eigen::Matrix3d const R_2{Exp(phi_2)};
+    EXPECT_TRUE(IsRotation(R_2));
+    EXPECT_TRUE(R_2.diagonal().isApprox(Eigen::Vector3d{-1, 1, -1}));
 
-    Eigen::Vector3d const a3{Eigen::Vector3d(0, 0, M_PI)};
-    Eigen::Matrix3d const exp_a3{Exp(a3)};
-    EXPECT_TRUE(IsRotation(exp_a3));
-    EXPECT_TRUE(exp_a3.diagonal().isApprox(Eigen::Vector3d{-1, -1, 1}));
+    Eigen::Vector3d const phi_3{Eigen::Vector3d(0, 0, M_PI)};
+    Eigen::Matrix3d const R_3{Exp(phi_3)};
+    EXPECT_TRUE(IsRotation(R_3));
+    EXPECT_TRUE(R_3.diagonal().isApprox(Eigen::Vector3d{-1, -1, 1}));
 
-    Eigen::Matrix3d const sum{exp_a1 * exp_a2 * exp_a3};
+    Eigen::Matrix3d const sum{R_1 * R_2 * R_3};
     EXPECT_TRUE(IsRotation(sum));
-    EXPECT_TRUE(sum.isApprox(Eigen::Matrix3d::Identity()));  // Is this in essence a singularity?
+    EXPECT_TRUE(sum.isApprox(
+        Eigen::Matrix3d::Identity()));  // Are the coordinates that we fed in above in essence a singularity?
 }
 
 TEST(Lie, TestLog) {
@@ -50,17 +51,17 @@ TEST(Lie, TestLog) {
     // function when the angle is equal to pi, the sin of it will be zero and we will get a divide by zero :( This needs
     // to be looked at closely!
 
-    Eigen::Vector3d const a{Eigen::Vector3d{0, 0, 0}};
-    Eigen::Vector3d const a_processed{Log(Exp(a))};  // Log and Exp are inverse of one another
-    EXPECT_TRUE(a.isApprox(a_processed));            // Check that we get back what we put in
+    Eigen::Vector3d const phi{Eigen::Vector3d{0, 0, 0}};
+    Eigen::Vector3d const phi_processed{Log(Exp(phi))};  // Log and Exp are inverse of one another
+    EXPECT_TRUE(phi.isApprox(phi_processed));            // Check that we get back what we put in
 
-    Eigen::Vector3d const a1{Eigen::Vector3d{0.1, 0.2, 0.3}};  // Random value
-    Eigen::Vector3d const a1_processed{Log(Exp(a1))};
-    EXPECT_TRUE(a1.isApprox(a1_processed));
+    Eigen::Vector3d const phi_1{Eigen::Vector3d{0.1, 0.2, 0.3}};  // Random value
+    Eigen::Vector3d const phi_1_processed{Log(Exp(phi_1))};
+    EXPECT_TRUE(phi_1.isApprox(phi_1_processed));
 
-    Eigen::Vector3d const a2{Eigen::Vector3d{-0.1, -0.2, -0.3}};
-    Eigen::Vector3d const a2_processed{Log(Exp(a2))};
-    EXPECT_TRUE(a2.isApprox(a2_processed));
+    Eigen::Vector3d const phi_2{Eigen::Vector3d{-0.1, -0.2, -0.3}};
+    Eigen::Vector3d const phi_2_processed{Log(Exp(phi_2))};
+    EXPECT_TRUE(phi_2.isApprox(phi_2_processed));
 }
 
 TEST(Lie, TestHatOperators) {
