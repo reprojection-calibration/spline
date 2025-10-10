@@ -5,17 +5,7 @@
 #include "r3_spline.hpp"  // REMOVE AND USE COMMON IMPLEMENTATIONS
 #include "types.hpp"
 #include "utilities.hpp"
-
-// Testing Util - COPY AND PASTED
-bool IsRotation(Eigen::Matrix3d const& R) {
-    Eigen::Matrix3d const RRT{R * R.transpose()};  // For rotations R^T = R^-1
-    bool const is_orthogonal{(RRT - Eigen::Matrix3d::Identity()).norm() < 1e-10};
-
-    double const D{R.determinant()};
-    bool const is_proper{(D - 1) < std::numeric_limits<double>::epsilon()};  // Determinant is positive one
-
-    return is_orthogonal and is_proper;
-}
+#include "utilities_testing.hpp"
 
 namespace reprojection_calibration::spline {
 
@@ -34,10 +24,11 @@ class So3Spline {
         }
 
         static MatrixKK const M{CumulativeBlendingMatrix(constants::k)};  // Static means it only evaluates once :)
-        VectorK const u{r3Spline::CalculateU(u_i, derivative)}; // Use common one!
+        VectorK const u{r3Spline::CalculateU(u_i, derivative)};           // Use common one!
 
-        VectorK const weights{M * u};  // TODO NAME
+        VectorK const weight{M * u};  // TODO NAME
 
+        // TODO(Jack): Can we replace this all with a std::accumulate call?
         Eigen::Matrix3d result{knots_[i]};
         for (int j{0}; j < (constants::k - 1); ++j) {
             Eigen::Matrix3d const& p0{knots_[i + j]};
@@ -45,9 +36,9 @@ class So3Spline {
 
             Eigen::Matrix3d const r01{p0.inverse() * p1};
             Eigen::Vector3d const delta{Log(r01)};
-            Eigen::Vector3d const kdelta = delta * weights[j + 1];
+            Eigen::Vector3d const weighted_delta{weight[j + 1] * delta};
 
-            result *= Exp(kdelta);
+            result *= Exp(weighted_delta);
         }
 
         return result;
