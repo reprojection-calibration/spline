@@ -12,6 +12,7 @@ add_compile_options(-Werror -Wall -Wextra -Wpedantic)
 find_package(Eigen3 REQUIRED)
 
 set(SRC_FILES
+        src/lie.cpp
         src/r3_spline.cpp
         src/utilities.cpp
 )
