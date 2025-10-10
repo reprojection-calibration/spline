@@ -38,8 +38,9 @@ enable_testing()
 include(GoogleTest)
 
 set(TESTS
-        src/utilities.test.cpp
+        src/lie.test.cpp
         src/r3_spline.test.cpp
+        src/utilities.test.cpp
 )
 foreach (TEST IN LISTS TESTS)
     get_filename_component(TEST_NAME ${TEST} NAME_WLE)
