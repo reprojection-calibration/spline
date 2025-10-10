@@ -2,18 +2,9 @@
 
 #include <gtest/gtest.h>
 
+#include "utilities_testing.hpp"
+
 using namespace reprojection_calibration::spline;
-
-// Testing Util - COPY AND PASTED
-bool IsRotation(Eigen::Matrix3d const& R) {
-    Eigen::Matrix3d const RRT{R * R.transpose()};  // For rotations R^T = R^-1
-    bool const is_orthogonal{(RRT - Eigen::Matrix3d::Identity()).norm() < 1e-10};
-
-    double const D{R.determinant()};
-    bool const is_proper{(D - 1) < std::numeric_limits<double>::epsilon()};  // Determinant is positive one
-
-    return is_orthogonal and is_proper;
-}
 
 TEST(Lie, TestExp) {
     // NOTE(Jack): These values in the tests are more or less just intuitive heuristic values - if anyone has a better
