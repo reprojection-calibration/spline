@@ -19,8 +19,7 @@ class r3Spline {
                                     DerivativeOrder const derivative = DerivativeOrder::Null) const;
 
     // TODO(Jack): Can we use this same method also for the rotation spline?
-    static VectorK CalculateU(double const u_i,
-                              DerivativeOrder const derivative = DerivativeOrder::Null);
+    static VectorK CalculateU(double const u_i, DerivativeOrder const derivative = DerivativeOrder::Null);
 
     // TODO(Jack): Let us consider what benefit we would get from making this private at some later point
     std::vector<VectorD> knots_;  // A.k.a. "control points"
