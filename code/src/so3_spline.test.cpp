@@ -1,61 +1,11 @@
+#include "so3_spline.hpp"
+
 #include <gtest/gtest.h>
 
 #include "constants.hpp"
 #include "lie.hpp"
-#include "r3_spline.hpp"  // REMOVE AND USE COMMON IMPLEMENTATIONS
-#include "types.hpp"
 #include "utilities.hpp"
 #include "utilities_testing.hpp"
-
-namespace reprojection_calibration::spline {
-
-// TODO(Jack): There is a non-trivial amount of copying and pasting between the r3 and s03 spline classes. Keep our eyes
-// peeled for cost effective and well abstracted optimizations!
-class So3Spline {
-   public:
-    So3Spline(uint64_t const t0_ns, uint64_t const delta_t_ns) : t0_ns_{t0_ns}, delta_t_ns_{delta_t_ns} {}
-
-    std::optional<Eigen::Matrix3d> Evaluate(uint64_t const t_ns,
-                                            DerivativeOrder const derivative = DerivativeOrder::Null) const {
-        auto const [u_i, i]{NormalizedSegmentTime(t0_ns_, t_ns, delta_t_ns_)};
-
-        if (std::size(knots_) < static_cast<size_t>(i + constants::k)) {
-            return std::nullopt;
-        }
-
-        static MatrixKK const M{CumulativeBlendingMatrix(constants::k)};  // Static means it only evaluates once :)
-        VectorK const u{r3Spline::CalculateU(u_i, derivative)};           // Use common one!
-
-        VectorK const weight{M * u};  // TODO NAME
-
-        // TODO(Jack): Can we replace this all with a std::accumulate call?
-        Eigen::Matrix3d result{knots_[i]};
-        for (int j{0}; j < (constants::k - 1); ++j) {
-            Eigen::Matrix3d const& p0{knots_[i + j]};
-            Eigen::Matrix3d const& p1{knots_[i + j + 1]};
-
-            Eigen::Matrix3d const r01{p0.inverse() * p1};
-            Eigen::Vector3d const delta{Log(r01)};
-            Eigen::Vector3d const weighted_delta{weight[j + 1] * delta};
-
-            result *= Exp(weighted_delta);
-        }
-
-        return result;
-    }
-
-    // NOTE(Jack): It would feel more natural to store the so3 vectors here but the math required in the evaluate
-    // function happens more in the SO3 space so it makes more sense to have the knots be in that format - it is also
-    // what people would expect to get returned from the Evaluate() function, so we are consistent.
-    // TODO(Jack): When adding a knot should we check that it is a rotation matrix?
-    std::vector<Eigen::Matrix3d> knots_;
-
-   private:
-    uint64_t t0_ns_;
-    uint64_t delta_t_ns_;
-};
-
-}  // namespace reprojection_calibration::spline
 
 using namespace reprojection_calibration::spline;
 
