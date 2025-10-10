@@ -34,8 +34,10 @@ Eigen::MatrixXd PolynomialCoefficients(int const k) {
 }
 
 // TODO(Jack): Is derivative really the right term here?
+// NOTE(Jack): Sometimes we have to call it u or u_i depending if we also have the vector u in the same namespace
 Eigen::VectorXd TimePolynomial(int const k, double const u, int const derivative) {
     assert(k >= 1);  // u will also be positive but I am not sure that condition is related to this function itself.
+    assert(0 <= u and u < 1);
     assert(0 <= derivative and derivative <= k - 1);
 
     Eigen::VectorXd result{Eigen::VectorXd(k)};
