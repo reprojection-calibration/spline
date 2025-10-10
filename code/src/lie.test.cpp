@@ -2,8 +2,9 @@
 
 #include <gtest/gtest.h>
 
-// Testing Util
+using namespace reprojection_calibration::spline;
 
+// Testing Util
 bool IsRotation(Eigen::Matrix3d const& R) {
     Eigen::Matrix3d const RRT{R * R.transpose()};  // For rotations R^T = R^-1
     bool const is_orthogonal{(RRT - Eigen::Matrix3d::Identity()).norm() < 1e-10};
@@ -13,43 +14,6 @@ bool IsRotation(Eigen::Matrix3d const& R) {
 
     return is_orthogonal and is_proper;
 }
-
-namespace reprojection_calibration::spline {
-
-Eigen::Matrix3d Exp(Eigen::Vector3d const& phi) {
-    double const angle{phi.norm()};
-
-    if (angle < 1e-6) {
-        // use first order taylor expansion when phi is small
-        return Eigen::Matrix3d::Identity() + Hat(phi);
-    }
-
-    Eigen::Vector3d const axis{phi / angle};
-    double const cos{std::cos(angle)};
-    double const sin{std::sin(angle)};
-
-    return ((cos * Eigen::Matrix3d::Identity()) + ((1.0 - cos) * axis * axis.transpose()) + (sin * Hat(axis)));
-}
-
-Eigen::Vector3d Log(Eigen::Matrix3d const& R) {
-    double cos{(0.5 * R.trace()) - 0.5};
-    cos = std::clamp(cos, -1.0, 1.0);
-
-    double const angle{std::acos(cos)};
-
-    if (angle < 1e-6) {
-        // use first order taylor expansion when angle is small
-        return Vee(R - Eigen::Matrix3d::Identity());
-    }
-
-    // ERROR(Jack): What about when angle is equal to pi? Then we risk a division by one unless we adjust the condition
-    // above?
-    return Vee((0.5 * angle / std::sin(angle)) * (R - R.transpose()));
-}
-
-}  // namespace reprojection_calibration::spline
-
-using namespace reprojection_calibration::spline;
 
 TEST(Lie, TestExp) {
     // NOTE(Jack): These values in the tests are more or less just intuitive heuristic values - if anyone has a better
