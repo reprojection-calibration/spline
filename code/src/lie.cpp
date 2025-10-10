@@ -32,6 +32,8 @@ Eigen::Vector3d Log(Eigen::Matrix3d const& R) {
 
     // ERROR(Jack): What about when angle is equal to pi? Then we risk a division by one unless we adjust the condition
     // above?
+    // NOTE(Jack): It seems like most other places use a quaternion intermediate representation, maybe that is a better
+    // idea than what we do here?
     return Vee((0.5 * angle / std::sin(angle)) * (R - R.transpose()));
 }
 

@@ -50,6 +50,7 @@ endif()
 set(TESTS
         src/lie.test.cpp
         src/r3_spline.test.cpp
+        src/so3_spline.test.cpp
         src/utilities.test.cpp
 )
 foreach (TEST IN LISTS TESTS)

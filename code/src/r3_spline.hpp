@@ -14,7 +14,6 @@ class r3Spline {
    public:
     r3Spline(uint64_t const t0_ns, uint64_t const delta_t_ns);
 
-    // TODO(Jack): use enum and static cast instead of int
     std::optional<VectorD> Evaluate(uint64_t const t_ns,
                                     DerivativeOrder const derivative = DerivativeOrder::Null) const;
 
