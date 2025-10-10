@@ -12,6 +12,7 @@ add_compile_options(-Werror -Wall -Wextra -Wpedantic)
 find_package(Eigen3 REQUIRED)
 
 set(SRC_FILES
+        src/lie.cpp
         src/r3_spline.cpp
         src/utilities.cpp
 )
@@ -38,8 +39,9 @@ enable_testing()
 include(GoogleTest)
 
 set(TESTS
-        src/utilities.test.cpp
+        src/lie.test.cpp
         src/r3_spline.test.cpp
+        src/utilities.test.cpp
 )
 foreach (TEST IN LISTS TESTS)
     get_filename_component(TEST_NAME ${TEST} NAME_WLE)
