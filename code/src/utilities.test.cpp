@@ -62,7 +62,7 @@ TEST(Utilities, TestBlendingMatrix) {
 }
 
 TEST(Utilities, TestBinomialCoefficient) {
-    // Wiki: " where it gives the number of ways, disregarding order, that k objects can be chosen from among n objects"
+    // Wiki: "where it gives the number of ways, disregarding order, that k objects can be chosen from among n objects"
     EXPECT_EQ(BinomialCoefficient(0, 0), 1);
     EXPECT_EQ(BinomialCoefficient(10, 0), 1);
     EXPECT_EQ(BinomialCoefficient(5, 5), 1);

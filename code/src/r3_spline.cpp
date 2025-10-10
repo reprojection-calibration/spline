@@ -1,6 +1,7 @@
 #include "r3_spline.hpp"
 
 #include "constants.hpp"
+#include "types.hpp"
 #include "utilities.hpp"
 
 namespace reprojection_calibration::spline {
@@ -17,22 +18,26 @@ std::optional<VectorD> r3Spline::Evaluate(uint64_t const t_ns, DerivativeOrder c
     }
 
     MatrixDK const P{Eigen::Map<const MatrixDK>(knots_[i].data(), constants::d, constants::k)};
-    // TODO(Jack): Consider if static instantiation or being part of the class for the static variables here makes more
-    // sense.
     static MatrixKK const M{BlendingMatrix(constants::k)};  // Static means it only evaluates once :)
-
-    // We are constructing the column vectors that we multiply by C as found at the top of page five in [2] - this
-    // construction depends on which derivative we are evaluating the spline at.
-    static MatrixKK const polynomial_coefficients{PolynomialCoefficients(constants::k)};
-    int const derivative_order{static_cast<int>(derivative)};
-
-    // TODO(Jack): This is the only place the derivative order shows up, there has to be a way to better abstract this
-    // code and this function in general!
-    VectorK const u{polynomial_coefficients.row(derivative_order).transpose().array() *
-                    TimePolynomial(constants::k, u_i, derivative_order).array() /
-                    std::pow(delta_t_ns_, derivative_order)};
+    VectorK const u{r3Spline::CalculateU(u_i, delta_t_ns_, derivative)};
 
     return (P * M * u);
+}
+
+// We are constructing the column vectors u that we multiply by C as found at the top of page five in [2] - this
+// construction depends on which derivative we are evaluating the spline at.
+// TODO(Jack): We also can calculate std::pow(delta_t_ns, derivative_order) in the constructor ahead of time if we
+// find out it causes some problems.
+VectorK r3Spline::CalculateU(double const u_i, uint64_t const delta_t_ns, DerivativeOrder const derivative) {
+    static MatrixKK const polynomial_coefficients{
+        PolynomialCoefficients(constants::k)};  // Static means it only evaluates once :)
+
+    int const derivative_order{static_cast<int>(derivative)};
+    VectorK const u{polynomial_coefficients.row(derivative_order).transpose().array() *
+                    TimePolynomial(constants::k, u_i, derivative_order).array() /
+                    std::pow(delta_t_ns, derivative_order)};
+
+    return u;
 }
 
 }  // namespace reprojection_calibration::spline
