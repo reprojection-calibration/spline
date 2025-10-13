@@ -2,38 +2,45 @@
 
 set -eou pipefail
 
-usage() {
-    echo "Usage: $0 -t <target-stage>"
-    echo "  -t <target-stage>     : Target build stage (e.g., build, development)"
-    exit 1
-}
+no_cache=()
+target_stage=development
 
-TARGET_STAGE=development
-
-# TODO: add an option to pass the --no-cache flag 
-while getopts ":t:" opt; do
-  case ${opt} in
-    t ) TARGET_STAGE=$OPTARG ;;
-    * ) usage ;;
+for i in "$@"; do
+  case $i in
+    --no-cache)
+      no_cache=("--no-cache")
+      shift
+      ;;
+    -ts=*|--target-stage=*)
+      target_stage="${i#*=}"
+      shift
+      ;;
+    -*)
+      echo "Unknown option $i"
+      exit 1;
+      ;;
+    *)
+      ;;
   esac
 done
 
-IMAGE=spline
-SCRIPT_FOLDER="$(dirname "$(realpath -s "$0")")"
-TAG=${IMAGE}:${TARGET_STAGE}
+image=spline
+script_folder="$(dirname "$(realpath -s "$0")")"
+tag=${image}:${target_stage}
 
-echo "Building image with tag '$TAG' targeting stage '$TARGET_STAGE'..."
+echo "Building image with tag '$tag' targeting stage '$target_stage'..."
 DOCKER_BUILDKIT=1 docker build \
-    --file "${SCRIPT_FOLDER}"/../Dockerfile \
-    --tag "${TAG}" \
-    --target "${TARGET_STAGE}"-stage \
+    --file "${script_folder}"/../Dockerfile \
+    "${no_cache[@]}" \
+    --tag "${tag}" \
+    --target "${target_stage}"-stage \
     --progress=plain \
-    "${SCRIPT_FOLDER}"/../../
+    "${script_folder}"/../../
 
 BUILD_SUCCESSFUL=$?
 
 if [ ${BUILD_SUCCESSFUL} -eq 0 ]; then
-    echo "Build successful: ${TAG}"
+    echo "Build successful: ${tag}"
 else
     echo "Build failed"
     exit 1

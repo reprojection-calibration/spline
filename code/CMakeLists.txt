@@ -6,6 +6,9 @@ project(
         LANGUAGES CXX
 )
 
+
+option(CODE_COVERAGE "Enable coverage reporting" ON)
+
 set(CMAKE_CXX_STANDARD 17)
 add_compile_options(-Werror -Wall -Wextra -Wpedantic)
 
@@ -38,6 +41,12 @@ FetchContent_MakeAvailable(googletest)
 enable_testing()
 include(GoogleTest)
 
+# Adopted from https://github.com/svnscha/cpp-coverage-example/tree/main
+if (CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    target_compile_options(${PROJECT_NAME} PRIVATE --coverage -O0 -g)
+    target_link_options(${PROJECT_NAME} PRIVATE --coverage)
+endif()
+
 set(TESTS
         src/lie.test.cpp
         src/r3_spline.test.cpp
@@ -50,5 +59,11 @@ foreach (TEST IN LISTS TESTS)
             GTest::gtest_main
             ${PROJECT_NAME}
     )
+
+    if (CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+        target_compile_options(${TEST_NAME} PRIVATE --coverage -O0 -g)
+        target_link_options(${TEST_NAME} PRIVATE --coverage)
+    endif()
+
     gtest_discover_tests(${TEST_NAME})
 endforeach ()

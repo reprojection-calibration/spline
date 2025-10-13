@@ -31,7 +31,7 @@ Eigen::MatrixXd PolynomialCoefficients(int const k) {
     }
 
     return result;
-}
+}  // LCOV_EXCL_LINE
 
 // TODO(Jack): Is derivative really the right term here?
 // NOTE(Jack): Sometimes we have to call it u or u_i depending if we also have the vector u in the same namespace
@@ -47,7 +47,7 @@ Eigen::VectorXd TimePolynomial(int const k, double const u, int const derivative
     }
 
     return result;
-}
+}  // LCOV_EXCL_LINE
 
 Eigen::MatrixXd BlendingMatrix(int const k) {
     Eigen::MatrixXd result{Eigen::MatrixXd::Zero(k, k)};

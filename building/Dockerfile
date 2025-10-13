@@ -30,6 +30,30 @@ RUN --mount=type=bind,source=${CODE_CHECKS},target=/temporary/${CODE_CHECKS} \
     --mount=type=bind,source=code/,target=/temporary/code \
     /temporary/${CODE_CHECKS}
 
+FROM base-stage AS code-coverage-stage
+
+ARG BUILD_LIBRARY=building/scripts/build_library.sh
+RUN --mount=type=bind,source=${BUILD_LIBRARY},target=/temporary/${BUILD_LIBRARY} \
+    --mount=type=bind,source=code/,target=/temporary/code \
+    /temporary/${BUILD_LIBRARY} --code-coverage
+
+ARG CODE_COVERAGE=building/scripts/code_coverage.sh
+RUN --mount=type=bind,source=${CODE_COVERAGE},target=/temporary/${CODE_COVERAGE} \
+    --mount=type=bind,source=code/,target=/temporary/code \
+    /temporary/${CODE_COVERAGE}
+
+FROM nginx AS code-coverage-report-stage
+
+# Open http://localhost:8080 to view the report
+COPY --from=code-coverage-stage  /buildroot/coverage-report  /usr/share/nginx/html
+
+FROM code-coverage-stage AS code-coverage-assertion-stage
+
+ARG CODE_COVERAGE_ASSERTION=building/scripts/code_coverage_assertion.sh
+RUN --mount=type=bind,source=${CODE_COVERAGE_ASSERTION},target=/temporary/${CODE_COVERAGE_ASSERTION} \
+    --mount=type=bind,source=code/,target=/temporary/code \
+    /temporary/${CODE_COVERAGE_ASSERTION}
+
 FROM base-stage AS build-stage
 
 ARG BUILD_LIBRARY=building/scripts/build_library.sh
@@ -37,12 +61,6 @@ RUN --mount=type=bind,source=${BUILD_LIBRARY},target=/temporary/${BUILD_LIBRARY}
     --mount=type=bind,source=code/,target=/temporary/code \
     /temporary/${BUILD_LIBRARY}
 
-FROM base-stage AS release-stage
-
-# TODO(Jack): We should actually use cmakes install capability instead of just copying over the entire build folder!
-COPY --from=build-stage /buildroot/build /buildroot/build
-
-ENTRYPOINT ["/buildroot/build/webcam_demo", "-c", "/temporary/code/examples/target_config.yaml"]
 
 FROM base-stage AS development-stage
 
