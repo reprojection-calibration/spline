@@ -4,7 +4,6 @@
 
 #include "constants.hpp"
 #include "lie.hpp"
-#include "utilities.hpp"
 #include "utilities_testing.hpp"
 
 using namespace reprojection_calibration::spline;
@@ -48,4 +47,22 @@ TEST(So3Spline, TestSo3SplineEvaluate) {
     EXPECT_FLOAT_EQ(p_0.value().diagonal().sum(),
                     2.9593055);  // HEURISTIC! No theoretical testing strategy at this time - we have this here just so
                                  // that we can detect changes to the implementation quickly (hopefully. )
+}
+
+TEST(So3Spline, TestSo3SplineEvaluateVelocity) {
+    uint64_t const delta_t_ns{5};
+    So3Spline so3_spline{100, delta_t_ns};
+    so3_spline.knots_.push_back(Exp(Eigen::Vector3d::Zero()));
+
+    for (int i{1}; i < constants::k; ++i) {
+        so3_spline.knots_.push_back(so3_spline.knots_.back() *
+                                    Exp((static_cast<double>(i) / 10) * Eigen::Vector3d::Ones()));
+    }
+
+    // RANDOM HEURISTIC TESTS!
+    Eigen::Vector3d const v0{so3_spline.EvaluateVelocity(100).value()};
+    EXPECT_TRUE(v0.isApproxToConstant(0.03));
+
+    Eigen::Vector3d const v4{so3_spline.EvaluateVelocity(104).value()};
+    EXPECT_TRUE(v4.isApproxToConstant(0.046));
 }

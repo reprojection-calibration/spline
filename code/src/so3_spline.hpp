@@ -13,6 +13,10 @@ class So3Spline {
 
     std::optional<Eigen::Matrix3d> Evaluate(uint64_t const t_ns) const;
 
+    std::optional<Eigen::Vector3d> EvaluateVelocity(uint64_t const t_ns) const;
+
+    std::optional<Eigen::Vector3d> EvaluateAcceleration(uint64_t const t_ns) const;
+
     // WARN(Jack): This function will not check that the provided IDs are actually valid and within the spline
     Eigen::Vector3d Delta(Eigen::Matrix3d const& R_1, Eigen::Matrix3d const& R_2) const;
 

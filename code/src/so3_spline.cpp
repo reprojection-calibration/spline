@@ -34,7 +34,60 @@ std::optional<Eigen::Matrix3d> So3Spline::Evaluate(uint64_t const t_ns) const {
     return result;
 }
 
-Eigen::Vector3d So3Spline::Delta(Eigen::Matrix3d const & R_0, Eigen::Matrix3d const& R_1) const {
+std::optional<Eigen::Vector3d> So3Spline::EvaluateVelocity(uint64_t const t_ns) const {
+    auto const normalized_position{time_handler_.SplinePosition(t_ns, std::size(knots_))};
+    if (not normalized_position.has_value()) {
+        return std::nullopt;
+    }
+    auto const [u_i, i]{normalized_position.value()};
+
+    static MatrixKK const M{CumulativeBlendingMatrix(constants::k)};  // Static means it only evaluates once :)
+    VectorK const u0{r3Spline::CalculateU(u_i, DerivativeOrder::Null)};
+    VectorK const weight0{M * u0};
+
+    VectorK const u1{r3Spline::CalculateU(u_i, DerivativeOrder::First)};
+    VectorK const weight1{M * u1 / std::pow(time_handler_.delta_t_ns_, static_cast<int>(DerivativeOrder::First))};
+
+    // TODO(Jack): Can we replace this all with a std::accumulate call?
+    Eigen::Vector3d velocity{Eigen::Vector3d::Zero()};
+    for (int j{0}; j < (constants::k - 1); ++j) {
+        Eigen::Vector3d const delta_j{Delta(knots_[i + j], knots_[i + j + 1])};
+        velocity = Exp(-weight0[j + 1] * delta_j) * velocity;
+        velocity += weight1[j + 1] * delta_j;
+    }
+
+    return velocity;
+}
+
+std::optional<Eigen::Vector3d> So3Spline::EvaluateAcceleration(uint64_t const t_ns) const {
+    auto const normalized_position{time_handler_.SplinePosition(t_ns, std::size(knots_))};
+    if (not normalized_position.has_value()) {
+        return std::nullopt;
+    }
+    auto const [u_i, i]{normalized_position.value()};
+
+    static MatrixKK const M{CumulativeBlendingMatrix(constants::k)};  // Static means it only evaluates once :)
+    VectorK const u0{r3Spline::CalculateU(u_i, DerivativeOrder::Null)};
+    VectorK const weight0{M * u0};
+
+    VectorK const u1{r3Spline::CalculateU(u_i, DerivativeOrder::First)};
+    VectorK const weight1{M * u1 / std::pow(time_handler_.delta_t_ns_, static_cast<int>(DerivativeOrder::First))};
+
+    VectorK const u2{r3Spline::CalculateU(u_i, DerivativeOrder::Second)};
+    VectorK const weight2{M * u1 / std::pow(time_handler_.delta_t_ns_, static_cast<int>(DerivativeOrder::Second))};
+
+    Eigen::Vector3d acceleration{Eigen::Vector3d::Zero()};
+    for (int j{0}; j < (constants::k - 1); ++j) {
+        Eigen::Vector3d const delta_j{Delta(knots_[i + j], knots_[i + j + 1])};
+        velocity = Exp(-weight0[j + 1] * delta_j) * velocity;
+        velocity += weight1[j + 1] * delta_j;
+    }
+
+    return acceleration;
+
+}
+
+Eigen::Vector3d So3Spline::Delta(Eigen::Matrix3d const& R_0, Eigen::Matrix3d const& R_1) const {
     return Log(R_0.inverse() * R_1);
 }
 
