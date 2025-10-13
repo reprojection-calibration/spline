@@ -48,7 +48,10 @@ COPY --from=code-coverage-stage  /buildroot/coverage-report  /usr/share/nginx/ht
 
 FROM code-coverage-stage AS code-coverage-github-action-stage
 
-RUN ls /github/workspace
+ARG CODE_COVERAGE_GITHUB_ACtiON=building/scripts/code_coverage_github_action.sh
+RUN --mount=type=bind,source=${CODE_COVERAGE_GITHUB_ACtiON},target=/temporary/${CODE_COVERAGE_GITHUB_ACtiON} \
+    --mount=type=bind,source=code/,target=/temporary/code \
+    /temporary/${CODE_COVERAGE_GITHUB_ACtiON}
 
 FROM base-stage AS build-stage
 
