@@ -25,14 +25,14 @@ for i in "$@"; do
   esac
 done
 
-IMAGE=spline
-TAG=${IMAGE}:${target_stage}
+image=spline
+tag=${image}:${target_stage}
 
-echo "Running container from image with tag '$TAG'..."
+echo "Running container from image with tag '$tag'..."
 docker run \
   --entrypoint="" \
   --interactive \
   --volume "${local_mount[@]}" \
   --rm \
   --tty \
-  "${TAG}" /bin/bash
+  "${tag}" /bin/bash
