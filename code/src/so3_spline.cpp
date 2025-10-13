@@ -10,15 +10,12 @@
 
 namespace reprojection_calibration::spline {
 
-// TODO REMOVE
-Eigen::Vector3d Delta(Eigen::Matrix3d const& R_0, Eigen::Matrix3d const& R_1) { return Log(R_0.inverse() * R_1); }
-
 // WARN(Jack): Will not check that the knots are valid to index! Depends on being called securely with an index from the
 // time handler.
 std::array<Eigen::Vector3d, constants::k - 1> DeltaPhi(std::vector<Eigen::Matrix3d> const& knots, int const segment) {
     std::array<Eigen::Vector3d, constants::k - 1> delta_phi;
     for (int j{0}; j < (constants::k - 1); ++j) {
-        delta_phi[j] = Delta(knots[segment + j], knots[segment + j + 1]);
+        delta_phi[j] = Log(knots[segment + j].inverse() * knots[segment + j + 1]);
     }
     return delta_phi;
 }
@@ -49,13 +46,14 @@ std::optional<Eigen::Matrix3d> So3Spline::Evaluate(uint64_t const t_ns) const {
     VectorK const weight0{M * u0};
 
     // TODO(Jack): What is really the right size for all of these?
+    // TODO(Jack): Is it possible or worth it to functionalize the velocity calculation?
     std::array<Eigen::Vector3d, constants::k - 1> const delta_phis{DeltaPhi(knots_, i)};
-    std::array<Eigen::Matrix3d, constants::k - 1> const weighted_delta_rs{WeightedDeltaRs(delta_phis, weight0)};
 
     // TODO(Jack): Can we replace this all with a std::accumulate call?
     Eigen::Matrix3d rotation{knots_[i]};
     for (int j{0}; j < (constants::k - 1); ++j) {
-        rotation *= weighted_delta_rs[j];
+        Eigen::Matrix3d const delta_R{Exp(weight0[j + 1] * delta_phis[j])};
+        rotation = delta_R * rotation;
     }
 
     return rotation;
@@ -78,15 +76,13 @@ std::optional<Eigen::Vector3d> So3Spline::EvaluateVelocity(uint64_t const t_ns) 
     VectorK const weight1{M * u1 / std::pow(time_handler_.delta_t_ns_, static_cast<int>(DerivativeOrder::First))};
 
     std::array<Eigen::Vector3d, constants::k - 1> const delta_phis{DeltaPhi(knots_, i)};
-    std::array<Eigen::Matrix3d, constants::k - 1> const weighted_delta_rs{WeightedDeltaRs(delta_phis, weight0)};
 
-    // TODO(Jack): Can we replace this all with a std::accumulate call?
     Eigen::Vector3d velocity{Eigen::Vector3d::Zero()};
     for (int j{0}; j < (constants::k - 1); ++j) {
-        Eigen::Matrix3d const rotation_inv{weighted_delta_rs[j].inverse()};
+        Eigen::Matrix3d const inverse_delta_R{Exp(weight0[j + 1] * delta_phis[j]).inverse()};
 
-        Eigen::Vector3d const vel_current{weight1[j + 1] * delta_phis[j]};
-        velocity = vel_current + (rotation_inv * velocity);
+        Eigen::Vector3d const delta_v_j{weight1[j + 1] * delta_phis[j]};
+        velocity = delta_v_j + (inverse_delta_R * velocity);
     }
 
     return velocity;
@@ -109,18 +105,17 @@ std::optional<Eigen::Vector3d> So3Spline::EvaluateAcceleration(uint64_t const t_
     VectorK const weight2{M * u2 / std::pow(time_handler_.delta_t_ns_, static_cast<int>(DerivativeOrder::Second))};
 
     std::array<Eigen::Vector3d, constants::k - 1> const delta_phis{DeltaPhi(knots_, i)};
-    std::array<Eigen::Matrix3d, constants::k - 1> const weighted_delta_rs{WeightedDeltaRs(delta_phis, weight0)};
 
     Eigen::Vector3d velocity{Eigen::Vector3d::Zero()};
     Eigen::Vector3d acceleration{Eigen::Vector3d::Zero()};
     for (int j{0}; j < (constants::k - 1); ++j) {
-        Eigen::Matrix3d const rotation_inv{weighted_delta_rs[j].inverse()};
+        Eigen::Matrix3d const inverse_delta_R{Exp(weight0[j + 1] * delta_phis[j]).inverse()};
 
-        Eigen::Vector3d const vel_current{weight1[j + 1] * delta_phis[j]};
-        velocity = vel_current + (rotation_inv * velocity);
+        Eigen::Vector3d const delta_v_j{weight1[j + 1] * delta_phis[j]};
+        velocity = delta_v_j + (inverse_delta_R * velocity);
 
-        acceleration = rotation_inv * acceleration;
-        acceleration += weight2[j + 1] * delta_phis[j] + velocity.cross(vel_current);
+        Eigen::Vector3d const delta_a_j{weight2[j + 1] * delta_phis[j] + velocity.cross(delta_v_j)};
+        acceleration = delta_a_j + (inverse_delta_R * acceleration);
     }
 
     return acceleration;
