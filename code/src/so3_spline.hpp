@@ -11,8 +11,7 @@ class So3Spline {
    public:
     So3Spline(uint64_t const t0_ns, uint64_t const delta_t_ns);
 
-    std::optional<Eigen::Matrix3d> Evaluate(uint64_t const t_ns,
-                                            DerivativeOrder const derivative = DerivativeOrder::Null) const;
+    std::optional<Eigen::Matrix3d> Evaluate(uint64_t const t_ns) const;
 
     // WARN(Jack): This function will not check that the provided IDs are actually valid and within the spline
     Eigen::Vector3d Delta(Eigen::Matrix3d const& R_1, Eigen::Matrix3d const& R_2) const;
