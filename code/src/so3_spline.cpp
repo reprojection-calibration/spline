@@ -8,6 +8,19 @@
 
 namespace reprojection_calibration::spline {
 
+// TODO REMOVE
+Eigen::Vector3d Delta(Eigen::Matrix3d const& R_0, Eigen::Matrix3d const& R_1) { return Log(R_0.inverse() * R_1); }
+
+// WARN(Jack): Will not check that the knots are valid to index! Depends on being called securely with an index from the
+// time handler.
+std::array<Eigen::Vector3d, constants::k - 1> DeltaPhi(std::vector<Eigen::Matrix3d> const& knots, int const segment) {
+    std::array<Eigen::Vector3d, constants::k - 1> delta_phi;
+    for (int j{0}; j < (constants::k - 1); ++j) {
+        delta_phi[j] = Delta(knots[segment + j], knots[segment + j + 1]);
+    }
+    return delta_phi;
+}
+
 So3Spline::So3Spline(uint64_t const t0_ns, uint64_t const delta_t_ns)
     : time_handler_{t0_ns, delta_t_ns, constants::k} {}
 
@@ -24,11 +37,12 @@ std::optional<Eigen::Matrix3d> So3Spline::Evaluate(uint64_t const t_ns) const {
     VectorK const u{r3Spline::CalculateU(u_i, DerivativeOrder::Null)};
     VectorK const weight{M * u};
 
+    std::array<Eigen::Vector3d, constants::k - 1> const delta_phis{DeltaPhi(knots_, i)};
+
     // TODO(Jack): Can we replace this all with a std::accumulate call?
     Eigen::Matrix3d rotation{knots_[i]};
     for (int j{0}; j < (constants::k - 1); ++j) {
-        Eigen::Vector3d const delta_j{Delta(knots_[i + j], knots_[i + j + 1])};
-        rotation *= Exp(weight[j + 1] * delta_j);
+        rotation *= Exp(weight[j + 1] * delta_phis[j]);
     }
 
     return rotation;
@@ -50,14 +64,15 @@ std::optional<Eigen::Vector3d> So3Spline::EvaluateVelocity(uint64_t const t_ns) 
     VectorK const u1{r3Spline::CalculateU(u_i, DerivativeOrder::First)};
     VectorK const weight1{M * u1 / std::pow(time_handler_.delta_t_ns_, static_cast<int>(DerivativeOrder::First))};
 
+    std::array<Eigen::Vector3d, constants::k - 1> const delta_phis{DeltaPhi(knots_, i)};
+
     // TODO(Jack): Can we replace this all with a std::accumulate call?
     Eigen::Vector3d velocity{Eigen::Vector3d::Zero()};
     for (int j{0}; j < (constants::k - 1); ++j) {
-        Eigen::Vector3d const delta_j{Delta(knots_[i + j], knots_[i + j + 1])};
-        Eigen::Matrix3d const rotation{Exp(-weight0[j + 1] * delta_j)};
+        Eigen::Matrix3d const rotation{Exp(-weight0[j + 1] * delta_phis[j])};
 
         velocity = rotation * velocity;
-        velocity += weight1[j + 1] * delta_j;
+        velocity += weight1[j + 1] * delta_phis[j];
     }
 
     return velocity;
@@ -80,25 +95,22 @@ std::optional<Eigen::Vector3d> So3Spline::EvaluateAcceleration(uint64_t const t_
     VectorK const u2{r3Spline::CalculateU(u_i, DerivativeOrder::Second)};
     VectorK const weight2{M * u2 / std::pow(time_handler_.delta_t_ns_, static_cast<int>(DerivativeOrder::Second))};
 
+    std::array<Eigen::Vector3d, constants::k - 1> const delta_phis{DeltaPhi(knots_, i)};
+
     Eigen::Vector3d velocity{Eigen::Vector3d::Zero()};
     Eigen::Vector3d acceleration{Eigen::Vector3d::Zero()};
     for (int j{0}; j < (constants::k - 1); ++j) {
-        Eigen::Vector3d const delta_j{Delta(knots_[i + j], knots_[i + j + 1])};
-        Eigen::Matrix3d const rotation{Exp(-weight0[j + 1] * delta_j)};
+        Eigen::Matrix3d const rotation{Exp(-weight0[j + 1] * delta_phis[j])};
 
         velocity = rotation * velocity;
-        Eigen::Vector3d const vel_current{weight1[j + 1] * delta_j};
+        Eigen::Vector3d const vel_current{weight1[j + 1] * delta_phis[j]};
         velocity += vel_current;
 
         acceleration = rotation * acceleration;
-        acceleration += weight2[j + 1] * delta_j + velocity.cross(vel_current);
+        acceleration += weight2[j + 1] * delta_phis[j] + velocity.cross(vel_current);
     }
 
     return acceleration;
-}
-
-Eigen::Vector3d So3Spline::Delta(Eigen::Matrix3d const& R_0, Eigen::Matrix3d const& R_1) const {
-    return Log(R_0.inverse() * R_1);
 }
 
 }  // namespace reprojection_calibration::spline
