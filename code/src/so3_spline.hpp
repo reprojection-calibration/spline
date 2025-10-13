@@ -14,6 +14,9 @@ class So3Spline {
     std::optional<Eigen::Matrix3d> Evaluate(uint64_t const t_ns,
                                             DerivativeOrder const derivative = DerivativeOrder::Null) const;
 
+    // WARN(Jack): This function will not check that the provided IDs are actually valid and within the spline
+    Eigen::Vector3d Delta(Eigen::Matrix3d const& R_1, Eigen::Matrix3d const& R_2) const;
+
     // NOTE(Jack): It would feel more natural to store the so3 vectors here but the math required in the evaluate
     // function happens more in the SO3 space so it makes more sense to have the knots be in that format - it is also
     // what people would expect to get returned from the Evaluate() function, so we are consistent.

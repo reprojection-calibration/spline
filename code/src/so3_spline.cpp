@@ -27,14 +27,15 @@ std::optional<Eigen::Matrix3d> So3Spline::Evaluate(uint64_t const t_ns, Derivati
     // TODO(Jack): Can we replace this all with a std::accumulate call?
     Eigen::Matrix3d result{knots_[i]};
     for (int j{0}; j < (constants::k - 1); ++j) {
-        Eigen::Matrix3d const& R0{knots_[i + j]};
-        Eigen::Matrix3d const& R1{knots_[i + j + 1]};
-        Eigen::Vector3d const delta{Log(R0.inverse() * R1)};
-
-        result *= Exp(weight[j + 1] * delta);
+        Eigen::Vector3d const delta_j{Delta(knots_[i + j], knots_[i + j + 1])};
+        result *= Exp(weight[j + 1] * delta_j);
     }
 
     return result;
+}
+
+Eigen::Vector3d So3Spline::Delta(Eigen::Matrix3d const & R_0, Eigen::Matrix3d const& R_1) const {
+    return Log(R_0.inverse() * R_1);
 }
 
 }  // namespace reprojection_calibration::spline
