@@ -37,12 +37,12 @@ RUN --mount=type=bind,source=${BUILD_LIBRARY},target=/temporary/${BUILD_LIBRARY}
     --mount=type=bind,source=code/,target=/temporary/code \
     /temporary/${BUILD_LIBRARY}
 
-FROM base-stage AS release-stage
+FROM build-stage AS code-coverage-stage
 
-# TODO(Jack): We should actually use cmakes install capability instead of just copying over the entire build folder!
-COPY --from=build-stage /buildroot/build /buildroot/build
-
-ENTRYPOINT ["/buildroot/build/webcam_demo", "-c", "/temporary/code/examples/target_config.yaml"]
+ARG CODE_COVERAGE=building/scripts/code_coverage.sh
+RUN --mount=type=bind,source=${CODE_COVERAGE},target=/temporary/${CODE_COVERAGE} \
+    --mount=type=bind,source=code/,target=/temporary/code \
+    /temporary/${CODE_COVERAGE}
 
 FROM base-stage AS development-stage
 
