@@ -9,13 +9,15 @@ code_coverage=OFF
 for i in "$@"; do
   case $i in
     --code-coverage)
-        code_coverage=ON
-        shift; ;;
+      code_coverage=ON
+      shift
+      ;;
     -*)
-        echo "Unknown option $i"
-        exit 1; ;;
+      echo "Unknown option $i"
+      exit 1
+      ;;
     *)
-        ;;
+      ;;
   esac
 done
 
