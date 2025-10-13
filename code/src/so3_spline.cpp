@@ -30,7 +30,7 @@ std::array<Eigen::Matrix3d, constants::k - 1> WeightedDeltaRs(
 }
 
 So3Spline::So3Spline(uint64_t const t0_ns, uint64_t const delta_t_ns)
-    : time_handler_{t0_ns, delta_t_ns, constants::k} {}
+    : time_handler_{t0_ns, delta_t_ns, constants::k}, M_{CumulativeBlendingMatrix(constants::k)} {}
 
 std::optional<Eigen::Matrix3d> So3Spline::Evaluate(uint64_t const t_ns) const {
     auto const normalized_position{time_handler_.SplinePosition(t_ns, std::size(knots_))};
@@ -39,11 +39,10 @@ std::optional<Eigen::Matrix3d> So3Spline::Evaluate(uint64_t const t_ns) const {
     }
     auto const [u_i, i]{normalized_position.value()};
 
-    static MatrixKK const M{CumulativeBlendingMatrix(constants::k)};  // Static means it only evaluates once :)
     // TODO(Jack): Use common generic method one! Pay attention to how we use the constants here though! If we will
     // always be the same dimension for both position and rotation maybe that simplifies things.
     VectorK const u0{r3Spline::CalculateU(u_i, DerivativeOrder::Null)};
-    VectorK const weight0{M * u0};
+    VectorK const weight0{M_ * u0};
 
     // TODO(Jack): What is really the right size for all of these?
     // TODO(Jack): Is it possible or worth it to functionalize the velocity calculation?
@@ -68,12 +67,10 @@ std::optional<Eigen::Vector3d> So3Spline::EvaluateVelocity(uint64_t const t_ns) 
     }
     auto const [u_i, i]{normalized_position.value()};
 
-    static MatrixKK const M{CumulativeBlendingMatrix(constants::k)};  // Static means it only evaluates once :)
     VectorK const u0{r3Spline::CalculateU(u_i, DerivativeOrder::Null)};
-    VectorK const weight0{M * u0};
-
+    VectorK const weight0{M_ * u0};
     VectorK const u1{r3Spline::CalculateU(u_i, DerivativeOrder::First)};
-    VectorK const weight1{M * u1 / std::pow(time_handler_.delta_t_ns_, static_cast<int>(DerivativeOrder::First))};
+    VectorK const weight1{M_ * u1 / std::pow(time_handler_.delta_t_ns_, static_cast<int>(DerivativeOrder::First))};
 
     std::array<Eigen::Vector3d, constants::k - 1> const delta_phis{DeltaPhi(knots_, i)};
 
@@ -95,14 +92,12 @@ std::optional<Eigen::Vector3d> So3Spline::EvaluateAcceleration(uint64_t const t_
     }
     auto const [u_i, i]{normalized_position.value()};
 
-    static MatrixKK const M{CumulativeBlendingMatrix(constants::k)};  // Static means it only evaluates once :)
-
     VectorK const u0{r3Spline::CalculateU(u_i, DerivativeOrder::Null)};
-    VectorK const weight0{M * u0};
+    VectorK const weight0{M_ * u0};
     VectorK const u1{r3Spline::CalculateU(u_i, DerivativeOrder::First)};
-    VectorK const weight1{M * u1 / std::pow(time_handler_.delta_t_ns_, static_cast<int>(DerivativeOrder::First))};
+    VectorK const weight1{M_ * u1 / std::pow(time_handler_.delta_t_ns_, static_cast<int>(DerivativeOrder::First))};
     VectorK const u2{r3Spline::CalculateU(u_i, DerivativeOrder::Second)};
-    VectorK const weight2{M * u2 / std::pow(time_handler_.delta_t_ns_, static_cast<int>(DerivativeOrder::Second))};
+    VectorK const weight2{M_ * u2 / std::pow(time_handler_.delta_t_ns_, static_cast<int>(DerivativeOrder::Second))};
 
     std::array<Eigen::Vector3d, constants::k - 1> const delta_phis{DeltaPhi(knots_, i)};
 

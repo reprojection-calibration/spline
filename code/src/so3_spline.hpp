@@ -25,6 +25,7 @@ class So3Spline {
 
    private:
     TimeHandler time_handler_;
+    MatrixKK const M_;
 };
 
 }  // namespace reprojection_calibration::spline
