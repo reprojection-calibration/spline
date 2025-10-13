@@ -44,14 +44,15 @@ RUN --mount=type=bind,source=${CODE_COVERAGE},target=/temporary/${CODE_COVERAGE}
 
 FROM nginx AS code-coverage-report-stage
 
+# Open http://localhost:8080 to view the report
 COPY --from=code-coverage-stage  /buildroot/coverage-report  /usr/share/nginx/html
 
-FROM code-coverage-stage AS code-coverage-github-action-stage
+FROM code-coverage-stage AS code-coverage-assertion-stage
 
-ARG CODE_COVERAGE_GITHUB_ACtiON=building/scripts/code_coverage_github_action.sh
-RUN --mount=type=bind,source=${CODE_COVERAGE_GITHUB_ACtiON},target=/temporary/${CODE_COVERAGE_GITHUB_ACtiON} \
+ARG CODE_COVERAGE_ASSERTION=building/scripts/code_coverage_assertion.sh
+RUN --mount=type=bind,source=${CODE_COVERAGE_ASSERTION},target=/temporary/${CODE_COVERAGE_ASSERTION} \
     --mount=type=bind,source=code/,target=/temporary/code \
-    /temporary/${CODE_COVERAGE_GITHUB_ACtiON}
+    /temporary/${CODE_COVERAGE_ASSERTION}
 
 FROM base-stage AS build-stage
 

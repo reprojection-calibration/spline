@@ -2,6 +2,8 @@
 
 set -eoux pipefail
 
+# https://github.com/linux-test-project/lcov/issues/129
+
 apt-get update
 apt-get install --no-install-recommends --yes \
  bc
