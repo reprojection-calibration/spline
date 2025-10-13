@@ -8,7 +8,7 @@ target_stage=development
 for i in "$@"; do
   case $i in
     --no-cache)
-      no_cache="--no-cache"
+      no_cache=("--no-cache")
       shift
       ;;
     -ts=*|--target-stage=*)
