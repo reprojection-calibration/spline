@@ -30,6 +30,18 @@ RUN --mount=type=bind,source=${CODE_CHECKS},target=/temporary/${CODE_CHECKS} \
     --mount=type=bind,source=code/,target=/temporary/code \
     /temporary/${CODE_CHECKS}
 
+FROM base-stage AS code-coverage-stage
+
+ARG BUILD_LIBRARY=building/scripts/build_library.sh
+RUN --mount=type=bind,source=${BUILD_LIBRARY},target=/temporary/${BUILD_LIBRARY} \
+    --mount=type=bind,source=code/,target=/temporary/code \
+    /temporary/${BUILD_LIBRARY} --code-coverage
+
+ARG CODE_COVERAGE=building/scripts/code_coverage.sh
+RUN --mount=type=bind,source=${CODE_COVERAGE},target=/temporary/${CODE_COVERAGE} \
+    --mount=type=bind,source=code/,target=/temporary/code \
+    /temporary/${CODE_COVERAGE}
+
 FROM base-stage AS build-stage
 
 ARG BUILD_LIBRARY=building/scripts/build_library.sh
@@ -37,12 +49,6 @@ RUN --mount=type=bind,source=${BUILD_LIBRARY},target=/temporary/${BUILD_LIBRARY}
     --mount=type=bind,source=code/,target=/temporary/code \
     /temporary/${BUILD_LIBRARY}
 
-FROM build-stage AS code-coverage-stage
-
-ARG CODE_COVERAGE=building/scripts/code_coverage.sh
-RUN --mount=type=bind,source=${CODE_COVERAGE},target=/temporary/${CODE_COVERAGE} \
-    --mount=type=bind,source=code/,target=/temporary/code \
-    /temporary/${CODE_COVERAGE}
 
 FROM base-stage AS development-stage
 

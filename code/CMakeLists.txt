@@ -7,7 +7,7 @@ project(
 )
 
 
-option(ENABLE_COVERAGE "Enable coverage reporting" ON)
+option(CODE_COVERAGE "Enable coverage reporting" ON)
 
 set(CMAKE_CXX_STANDARD 17)
 add_compile_options(-Werror -Wall -Wextra -Wpedantic)
@@ -42,7 +42,7 @@ enable_testing()
 include(GoogleTest)
 
 # Adopted from https://github.com/svnscha/cpp-coverage-example/tree/main
-if (ENABLE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+if (CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     target_compile_options(${PROJECT_NAME} PRIVATE --coverage -O0 -g)
     target_link_options(${PROJECT_NAME} PRIVATE --coverage)
 endif()
@@ -60,7 +60,7 @@ foreach (TEST IN LISTS TESTS)
             ${PROJECT_NAME}
     )
 
-    if (ENABLE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    if (CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
         target_compile_options(${TEST_NAME} PRIVATE --coverage -O0 -g)
         target_link_options(${TEST_NAME} PRIVATE --coverage)
     endif()
