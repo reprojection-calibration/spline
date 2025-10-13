@@ -34,6 +34,8 @@ std::optional<Eigen::Matrix3d> So3Spline::Evaluate(uint64_t const t_ns) const {
     return rotation;
 }
 
+// TODO(Jack): We could return matrices from all these by returning skew symmetric matrices, but I am not sure if that
+// makes sense yet :)
 std::optional<Eigen::Vector3d> So3Spline::EvaluateVelocity(uint64_t const t_ns) const {
     auto const normalized_position{time_handler_.SplinePosition(t_ns, std::size(knots_))};
     if (not normalized_position.has_value()) {

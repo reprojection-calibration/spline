@@ -78,11 +78,9 @@ TEST(So3Spline, TestSo3SplineEvaluateAcceleration) {
     }
 
     // RANDOM HEURISTIC TESTS! - but this does match exactly the change in velocity we see in the previous test :)
-    std::cout << so3_spline.EvaluateAcceleration(100).value() << std::endl;
     Eigen::Vector3d const v0{so3_spline.EvaluateAcceleration(100).value()};
     EXPECT_TRUE(v0.isApproxToConstant(0.004));
 
-    std::cout << so3_spline.EvaluateAcceleration(104).value() << std::endl;
     Eigen::Vector3d const v4{so3_spline.EvaluateAcceleration(104).value()};
     EXPECT_TRUE(v4.isApproxToConstant(0.004));
 }
