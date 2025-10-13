@@ -46,6 +46,10 @@ FROM nginx AS code-coverage-report-stage
 
 COPY --from=code-coverage-stage  /buildroot/coverage-report  /usr/share/nginx/html
 
+FROM code-coverage-stage AS code-coverage-github-action-stage
+
+RUN ls /github/workspace
+
 FROM base-stage AS build-stage
 
 ARG BUILD_LIBRARY=building/scripts/build_library.sh
