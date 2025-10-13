@@ -1,6 +1,5 @@
 #pragma once
 
-#include "r3_spline.hpp"  // REMOVE AND USE COMMON GENERIC IMPLEMENTATION
 #include "types.hpp"
 #include "utilities.hpp"
 
@@ -22,8 +21,7 @@ class So3Spline {
     std::vector<Eigen::Matrix3d> knots_;
 
    private:
-    uint64_t t0_ns_;
-    uint64_t delta_t_ns_;
+    TimeHandler time_handler_;
 };
 
 }  // namespace reprojection_calibration::spline

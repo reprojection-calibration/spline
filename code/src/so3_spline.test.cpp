@@ -28,7 +28,8 @@ TEST(So3Spline, TestSo3SplineInvalidEvaluateConditions) {
 }
 
 TEST(So3Spline, TestSo3SplineEvaluate) {
-    So3Spline so3_spline{100, 5};
+    uint64_t const delta_t_ns{5};
+    So3Spline so3_spline{100, delta_t_ns};
     so3_spline.knots_.push_back(Exp(Eigen::Vector3d::Zero()));
 
     for (int i{1}; i < constants::k; ++i) {
@@ -37,8 +38,7 @@ TEST(So3Spline, TestSo3SplineEvaluate) {
     }
 
     // Heuristic test as we have no theoretical testing strategy at this time.
-    // THIS IS THE delta_t - use variable here
-    for (int i{0}; i < 5; ++i) {
+    for (int i{0}; i < static_cast<int>(delta_t_ns); ++i) {
         auto const p_i{so3_spline.Evaluate(100 + i)};
         ASSERT_TRUE(p_i.has_value());
         EXPECT_TRUE(IsRotation(p_i.value()));

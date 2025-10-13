@@ -3,6 +3,7 @@
 #include <optional>
 
 #include "types.hpp"
+#include "utilities.hpp"
 
 namespace reprojection_calibration::spline {
 
@@ -24,8 +25,7 @@ class r3Spline {
     std::vector<VectorD> knots_;  // A.k.a. "control points"
 
    private:
-    uint64_t t0_ns_;
-    uint64_t delta_t_ns_;
+    TimeHandler time_handler_;
 };
 
 }  // namespace reprojection_calibration::spline

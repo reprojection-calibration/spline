@@ -8,14 +8,15 @@
 
 namespace reprojection_calibration::spline {
 
-So3Spline::So3Spline(uint64_t const t0_ns, uint64_t const delta_t_ns) : t0_ns_{t0_ns}, delta_t_ns_{delta_t_ns} {}
+So3Spline::So3Spline(uint64_t const t0_ns, uint64_t const delta_t_ns)
+    : time_handler_{t0_ns, delta_t_ns, constants::k} {}
 
 std::optional<Eigen::Matrix3d> So3Spline::Evaluate(uint64_t const t_ns, DerivativeOrder const derivative) const {
-    auto const [u_i, i]{NormalizedSegmentTime(t0_ns_, t_ns, delta_t_ns_)};
-
-    if (std::size(knots_) < static_cast<size_t>(i + constants::k)) {
+    auto const normalized_position{time_handler_.SplinePosition(t_ns, std::size(knots_))};
+    if (not normalized_position.has_value()) {
         return std::nullopt;
     }
+    auto const [u_i, i]{normalized_position.value()};
 
     static MatrixKK const M{CumulativeBlendingMatrix(constants::k)};  // Static means it only evaluates once :)
     // TODO(Jack): Use common generic method one! Pay attention to how we use the constants here though! If we will
