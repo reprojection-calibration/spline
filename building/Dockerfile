@@ -42,6 +42,10 @@ RUN --mount=type=bind,source=${CODE_COVERAGE},target=/temporary/${CODE_COVERAGE}
     --mount=type=bind,source=code/,target=/temporary/code \
     /temporary/${CODE_COVERAGE}
 
+FROM nginx AS code-coverage-report-stage
+
+COPY --from=code-coverage-stage  /buildroot/coverage-report  /usr/share/nginx/html
+
 FROM base-stage AS build-stage
 
 ARG BUILD_LIBRARY=building/scripts/build_library.sh
