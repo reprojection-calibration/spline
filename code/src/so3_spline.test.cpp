@@ -66,3 +66,23 @@ TEST(So3Spline, TestSo3SplineEvaluateVelocity) {
     Eigen::Vector3d const v4{so3_spline.EvaluateVelocity(104).value()};
     EXPECT_TRUE(v4.isApproxToConstant(0.046));
 }
+
+TEST(So3Spline, TestSo3SplineEvaluateAcceleration) {
+    uint64_t const delta_t_ns{5};
+    So3Spline so3_spline{100, delta_t_ns};
+    so3_spline.knots_.push_back(Exp(Eigen::Vector3d::Zero()));
+
+    for (int i{1}; i < constants::k; ++i) {
+        so3_spline.knots_.push_back(so3_spline.knots_.back() *
+                                    Exp((static_cast<double>(i) / 10) * Eigen::Vector3d::Ones()));
+    }
+
+    // RANDOM HEURISTIC TESTS! - but this does match exactly the change in velocity we see in the previous test :)
+    std::cout << so3_spline.EvaluateAcceleration(100).value() << std::endl;
+    Eigen::Vector3d const v0{so3_spline.EvaluateAcceleration(100).value()};
+    EXPECT_TRUE(v0.isApproxToConstant(0.004));
+
+    std::cout << so3_spline.EvaluateAcceleration(104).value() << std::endl;
+    Eigen::Vector3d const v4{so3_spline.EvaluateAcceleration(104).value()};
+    EXPECT_TRUE(v4.isApproxToConstant(0.004));
+}

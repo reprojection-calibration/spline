@@ -25,13 +25,13 @@ std::optional<Eigen::Matrix3d> So3Spline::Evaluate(uint64_t const t_ns) const {
     VectorK const weight{M * u};
 
     // TODO(Jack): Can we replace this all with a std::accumulate call?
-    Eigen::Matrix3d result{knots_[i]};
+    Eigen::Matrix3d rotation{knots_[i]};
     for (int j{0}; j < (constants::k - 1); ++j) {
         Eigen::Vector3d const delta_j{Delta(knots_[i + j], knots_[i + j + 1])};
-        result *= Exp(weight[j + 1] * delta_j);
+        rotation *= Exp(weight[j + 1] * delta_j);
     }
 
-    return result;
+    return rotation;
 }
 
 std::optional<Eigen::Vector3d> So3Spline::EvaluateVelocity(uint64_t const t_ns) const {
@@ -52,7 +52,9 @@ std::optional<Eigen::Vector3d> So3Spline::EvaluateVelocity(uint64_t const t_ns) 
     Eigen::Vector3d velocity{Eigen::Vector3d::Zero()};
     for (int j{0}; j < (constants::k - 1); ++j) {
         Eigen::Vector3d const delta_j{Delta(knots_[i + j], knots_[i + j + 1])};
-        velocity = Exp(-weight0[j + 1] * delta_j) * velocity;
+        Eigen::Matrix3d const rotation{Exp(-weight0[j + 1] * delta_j)};
+
+        velocity = rotation * velocity;
         velocity += weight1[j + 1] * delta_j;
     }
 
@@ -74,17 +76,23 @@ std::optional<Eigen::Vector3d> So3Spline::EvaluateAcceleration(uint64_t const t_
     VectorK const weight1{M * u1 / std::pow(time_handler_.delta_t_ns_, static_cast<int>(DerivativeOrder::First))};
 
     VectorK const u2{r3Spline::CalculateU(u_i, DerivativeOrder::Second)};
-    VectorK const weight2{M * u1 / std::pow(time_handler_.delta_t_ns_, static_cast<int>(DerivativeOrder::Second))};
+    VectorK const weight2{M * u2 / std::pow(time_handler_.delta_t_ns_, static_cast<int>(DerivativeOrder::Second))};
 
+    Eigen::Vector3d velocity{Eigen::Vector3d::Zero()};
     Eigen::Vector3d acceleration{Eigen::Vector3d::Zero()};
     for (int j{0}; j < (constants::k - 1); ++j) {
         Eigen::Vector3d const delta_j{Delta(knots_[i + j], knots_[i + j + 1])};
-        velocity = Exp(-weight0[j + 1] * delta_j) * velocity;
-        velocity += weight1[j + 1] * delta_j;
+        Eigen::Matrix3d const rotation{Exp(-weight0[j + 1] * delta_j)};
+
+        velocity = rotation * velocity;
+        Eigen::Vector3d const vel_current{weight1[j + 1] * delta_j};
+        velocity += vel_current;
+
+        acceleration = rotation * acceleration;
+        acceleration += weight2[j + 1] * delta_j + velocity.cross(vel_current);
     }
 
     return acceleration;
-
 }
 
 Eigen::Vector3d So3Spline::Delta(Eigen::Matrix3d const& R_0, Eigen::Matrix3d const& R_1) const {
