@@ -14,4 +14,4 @@ jobs:
     - name: Build the build-stage
       run: docker build . --file building/Dockerfile --tag spline:build-$(date +%s) --target build-stage
     - name: Build the code-coverage-stage
-      run: docker build . --file building/Dockerfile --tag spline:build-$(date +%s) --target code-coverage-github-action-stage
+      run: docker build . --file building/Dockerfile --tag spline:build-$(date +%s) --target code-coverage-github-action-stage --volume ${{ github.workspace }}:${{ github.workspace }}
