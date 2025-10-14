@@ -20,15 +20,6 @@ std::array<Eigen::Vector3d, constants::k - 1> DeltaPhi(std::vector<Eigen::Matrix
     return delta_phi;
 }
 
-std::array<Eigen::Matrix3d, constants::k - 1> WeightedDeltaRs(
-    std::array<Eigen::Vector3d, constants::k - 1> const& delta_phis, VectorK const& weight) {
-    std::array<Eigen::Matrix3d, constants::k - 1> weighted_delta_rs;
-    for (int j{0}; j < (constants::k - 1); ++j) {
-        weighted_delta_rs[j] = Exp(weight[j + 1] * delta_phis[j]);
-    }
-    return weighted_delta_rs;
-}
-
 So3Spline::So3Spline(uint64_t const t0_ns, uint64_t const delta_t_ns)
     : time_handler_{t0_ns, delta_t_ns, constants::k}, M_{CumulativeBlendingMatrix(constants::k)} {}
 

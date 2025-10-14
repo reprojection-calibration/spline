@@ -54,6 +54,8 @@ TEST(So3Spline, TestSo3SplineEvaluateVelocity) {
     So3Spline so3_spline{100, delta_t_ns};
     so3_spline.knots_.push_back(Exp(Eigen::Vector3d::Zero()));
 
+    EXPECT_EQ(so3_spline.EvaluateVelocity(100), std::nullopt);  // Not enough knots yet to evaluate velocity
+
     for (int i{1}; i < constants::k; ++i) {
         so3_spline.knots_.push_back(so3_spline.knots_.back() *
                                     Exp((static_cast<double>(i) / 10) * Eigen::Vector3d::Ones()));
@@ -71,6 +73,8 @@ TEST(So3Spline, TestSo3SplineEvaluateAcceleration) {
     uint64_t const delta_t_ns{5};
     So3Spline so3_spline{100, delta_t_ns};
     so3_spline.knots_.push_back(Exp(Eigen::Vector3d::Zero()));
+
+    EXPECT_EQ(so3_spline.EvaluateAcceleration(100), std::nullopt);  // Not enough knots yet to evaluate acceleration
 
     for (int i{1}; i < constants::k; ++i) {
         so3_spline.knots_.push_back(so3_spline.knots_.back() *
