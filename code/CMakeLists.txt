@@ -17,6 +17,7 @@ find_package(Eigen3 REQUIRED)
 set(SRC_FILES
         src/lie.cpp
         src/r3_spline.cpp
+        src/se3_spline.cpp
         src/so3_spline.cpp
         src/utilities.cpp
 )
