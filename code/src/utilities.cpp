@@ -40,7 +40,7 @@ Eigen::VectorXd TimePolynomial(int const k, double const u, int const derivative
     assert(0 <= u and u < 1);
     assert(0 <= derivative and derivative <= k - 1);
 
-    Eigen::VectorXd result{Eigen::VectorXd(k)};
+    Eigen::VectorXd result{Eigen::VectorXd::Zero(k)};
     result(derivative) = 1;
     for (int i{1 + derivative}; i < k; ++i) {
         result(i) = result(i - 1) * u;

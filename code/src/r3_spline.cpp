@@ -6,22 +6,20 @@
 
 namespace reprojection_calibration::spline {
 
-r3Spline::r3Spline(uint64_t const t0_ns, uint64_t const delta_t_ns) : t0_ns_{t0_ns}, delta_t_ns_{delta_t_ns} {}
+r3Spline::r3Spline(uint64_t const t0_ns, uint64_t const delta_t_ns) : time_handler_{t0_ns, delta_t_ns, constants::k} {}
 
 std::optional<VectorD> r3Spline::Evaluate(uint64_t const t_ns, DerivativeOrder const derivative) const {
-    auto const [u_i, i]{NormalizedSegmentTime(t0_ns_, t_ns, delta_t_ns_)};
-
-    // From reference [1] - "At time t in [t_i, t_i+1) the value of p(t) only depends on the control points p_i,
-    // p_i+1, ..., p_i+k-1" - See the start of the second paragraph in section 4.2 Matrix Representation.
-    if (std::size(knots_) < static_cast<size_t>(i + constants::k)) {
+    auto const normalized_position{time_handler_.SplinePosition(t_ns, std::size(knots_))};
+    if (not normalized_position.has_value()) {
         return std::nullopt;
     }
+    auto const [u_i, i]{normalized_position.value()};
 
     MatrixDK const P{Eigen::Map<const MatrixDK>(knots_[i].data(), constants::d, constants::k)};
     static MatrixKK const M{BlendingMatrix(constants::k)};  // Static means it only evaluates once :)
     VectorK const u{r3Spline::CalculateU(u_i, derivative)};
 
-    return (P * M * u) / std::pow(delta_t_ns_, static_cast<int>(derivative));
+    return (P * M * u) / std::pow(time_handler_.delta_t_ns_, static_cast<int>(derivative));
 }
 
 // We are constructing the column vectors u that we multiply by C as found at the top of page five in [2] - this

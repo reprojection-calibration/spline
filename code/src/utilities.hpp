@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Eigen/Dense>
+#include <optional>
 #include <tuple>
 
 namespace reprojection_calibration::spline {
@@ -24,5 +25,29 @@ Eigen::MatrixXd CumulativeBlendingMatrix(int const k);
 int BinomialCoefficient(int const n, int const k);
 
 int Factorial(int const n);
+
+// TODO(Jack): Where to define this?
+// TODO(Jack): Naming
+class TimeHandler {
+   public:
+    TimeHandler(uint64_t const t0_ns, uint64_t const delta_t_ns, int const k)
+        : t0_ns_{t0_ns}, delta_t_ns_{delta_t_ns}, k_{k} {}
+
+    std::optional<std::tuple<double, int>> SplinePosition(uint64_t const t_ns, size_t const num_knots) const {
+        auto const [u_i, i]{NormalizedSegmentTime(t0_ns_, t_ns, delta_t_ns_)};
+
+        // From reference [1] - "At time t in [t_i, t_i+1) the value of p(t) only depends on the control points p_i,
+        // p_i+1, ..., p_i+k-1" - See the start of the second paragraph in section 4.2 Matrix Representation.
+        if (num_knots < static_cast<size_t>(i + k_)) {
+            return std::nullopt;
+        }
+
+        return std::tuple{u_i, i};
+    }
+
+    uint64_t t0_ns_;
+    uint64_t delta_t_ns_;
+    int k_;
+};
 
 }  // namespace reprojection_calibration::spline
