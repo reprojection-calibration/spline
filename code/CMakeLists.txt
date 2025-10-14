@@ -46,11 +46,12 @@ include(GoogleTest)
 if (CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     target_compile_options(${PROJECT_NAME} PRIVATE --coverage -O0 -g)
     target_link_options(${PROJECT_NAME} PRIVATE --coverage)
-endif()
+endif ()
 
 set(TESTS
         src/lie.test.cpp
         src/r3_spline.test.cpp
+        src/se3_spline.test.cpp
         src/so3_spline.test.cpp
         src/utilities.test.cpp
 )
@@ -65,7 +66,7 @@ foreach (TEST IN LISTS TESTS)
     if (CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
         target_compile_options(${TEST_NAME} PRIVATE --coverage -O0 -g)
         target_link_options(${TEST_NAME} PRIVATE --coverage)
-    endif()
+    endif ()
 
     gtest_discover_tests(${TEST_NAME})
 endforeach ()

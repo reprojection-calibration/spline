@@ -9,7 +9,7 @@ bool IsRotation(Eigen::Matrix3d const& R) {
     bool const is_orthogonal{(RRT - Eigen::Matrix3d::Identity()).norm() < 1e-10};
 
     double const D{R.determinant()};
-    bool const is_proper{(D - 1) < std::numeric_limits<double>::epsilon()};  // Determinant is positive one
+    bool const is_proper{(D - 1) < 1e-15};  // Determinant is positive one
 
     return is_orthogonal and is_proper;
 }
